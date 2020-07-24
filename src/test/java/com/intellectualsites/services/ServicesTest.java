@@ -25,8 +25,11 @@ package com.intellectualsites.services;
 
 import com.google.common.reflect.TypeToken;
 import com.intellectualsites.services.mock.DefaultMockService;
+import com.intellectualsites.services.mock.DefaultSideEffectService;
 import com.intellectualsites.services.mock.MockService;
+import com.intellectualsites.services.mock.MockSideEffectService;
 import com.intellectualsites.services.mock.SecondaryMockService;
+import com.intellectualsites.services.mock.SecondaryMockSideEffectService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -38,17 +41,31 @@ public class ServicesTest {
         final ServicePipeline servicePipeline = ServicePipeline.builder().build();
         Assertions.assertNotNull(servicePipeline);
         servicePipeline.registerServiceType(TypeToken.of(MockService.class), new DefaultMockService());
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            servicePipeline.registerServiceType(TypeToken.of(MockService.class), new DefaultMockService());
-        });
+        Assertions.assertThrows(IllegalArgumentException.class, () -> servicePipeline.registerServiceType(TypeToken.of(MockService.class), new DefaultMockService()));
         final SecondaryMockService secondaryMockService = new SecondaryMockService();
         servicePipeline.registerServiceImplementation(TypeToken.of(MockService.class), secondaryMockService,
             Collections.singleton(secondaryMockService));
+        servicePipeline.registerServiceImplementation(MockService.class, mockContext -> new MockService.MockResult(-91),
+            Collections.singleton(mockContext -> mockContext.getString().startsWith("-91")));
         Assertions.assertEquals(32, servicePipeline.pump(new MockService.MockContext("Hello")).through(MockService.class)
             .getResult().getInteger());
         Assertions.assertEquals(999, servicePipeline.pump(new MockService.MockContext("potato")).through(MockService.class)
             .getResult().getInteger());
+        Assertions.assertEquals(-91, servicePipeline.pump(new MockService.MockContext("-91")).through(MockService.class)
+            .getResult().getInteger());
         Assertions.assertNotNull(servicePipeline.pump(new MockService.MockContext("oi")).through(MockService.class).getResultAsynchronously().get());
+    }
+
+    @Test public void testSideEffectServices() throws Exception {
+        final ServicePipeline servicePipeline = ServicePipeline.builder().build();
+        servicePipeline.registerServiceType(TypeToken.of(MockSideEffectService.class), new DefaultSideEffectService());
+        final MockSideEffectService.MockPlayer mockPlayer = new MockSideEffectService.MockPlayer(20);
+        Assertions.assertEquals(20, mockPlayer.getHealth());
+        Assertions.assertEquals(State.ACCEPTED, servicePipeline.pump(mockPlayer).through(MockSideEffectService.class).getResult());
+        Assertions.assertEquals(0, mockPlayer.getHealth());
+        mockPlayer.setHealth(20);
+        servicePipeline.registerServiceImplementation(MockSideEffectService.class, new SecondaryMockSideEffectService(), Collections.emptyList());
+        Assertions.assertThrows(IllegalStateException.class, () -> servicePipeline.pump(mockPlayer).through(MockSideEffectService.class).getResult());
     }
 
 }

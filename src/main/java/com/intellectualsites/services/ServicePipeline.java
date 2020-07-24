@@ -106,6 +106,25 @@ public final class ServicePipeline {
     }
 
     /**
+     * Register a service implementation for a type that is recognized by the pipeline. It is
+     * important that a call to {@link #registerServiceType(TypeToken, Service)} has been made
+     * beforehand, otherwise a {@link IllegalArgumentException} will be thrown
+     *
+     * @param type           Service type
+     * @param implementation Implementation of the service
+     * @param filters        Filters that will be used to determine whether or not the service gets used
+     * @param <Context>      Service context type
+     * @param <Result>       Service result type
+     * @return ServicePipeline The service pipeline instance
+     */
+    public <Context, Result> ServicePipeline registerServiceImplementation(
+        @Nonnull final Class<? extends Service<Context, Result>> type,
+        @Nonnull final Service<Context, Result> implementation,
+        @Nonnull final Collection<Predicate<Context>> filters) {
+        return registerServiceImplementation(TypeToken.of(type), implementation, filters);
+    }
+
+    /**
      * Start traversing the pipeline by providing the context that will be used
      * to generate the results
      *
