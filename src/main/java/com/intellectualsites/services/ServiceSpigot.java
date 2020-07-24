@@ -26,9 +26,9 @@ package com.intellectualsites.services;
 import com.google.common.reflect.TypeToken;
 
 import javax.annotation.Nonnull;
-import java.util.Collections;
-import java.util.Queue;
+import java.util.Deque;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Predicate;
 
 /**
  * Class that fo
@@ -59,10 +59,17 @@ public final class ServiceSpigot<Context, Result> {
      * @return Generated result
      */
     @Nonnull public Result getResult() {
-        final Queue<? extends ServiceRepository<Context, Result>.ServiceWrapper<? extends Service<Context, Result>>>
-            queue = Collections.asLifoQueue(this.repository.getQueue());
+        final Deque<? extends ServiceRepository<Context, Result>.ServiceWrapper<? extends Service<Context, Result>>>
+            queue = this.repository.getQueue();
         ServiceRepository<Context, Result>.ServiceWrapper<? extends Service<Context, Result>> wrapper;
-        while ((wrapper = queue.poll()) != null) {
+        outer: while ((wrapper = queue.pollLast()) != null) {
+            if (!wrapper.isDefaultImplementation()) {
+                for (final Predicate<Context> predicate : wrapper.getFilters()) {
+                    if (!predicate.test(this.context)) {
+                        continue outer;
+                    }
+                }
+            }
             final Result result = wrapper.getImplementation().handle(this.context);
             if (wrapper.getImplementation() instanceof SideEffectService && result == null) {
                 throw new IllegalStateException(String.format("SideEffectService '%s' returned null", wrapper.toString()));

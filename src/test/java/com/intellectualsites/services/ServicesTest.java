@@ -26,8 +26,11 @@ package com.intellectualsites.services;
 import com.google.common.reflect.TypeToken;
 import com.intellectualsites.services.mock.DefaultMockService;
 import com.intellectualsites.services.mock.MockService;
+import com.intellectualsites.services.mock.SecondaryMockService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import java.util.Collections;
 
 public class ServicesTest {
 
@@ -38,7 +41,12 @@ public class ServicesTest {
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
             servicePipeline.registerServiceType(TypeToken.of(MockService.class), new DefaultMockService());
         });
+        final SecondaryMockService secondaryMockService = new SecondaryMockService();
+        servicePipeline.registerServiceImplementation(TypeToken.of(MockService.class), secondaryMockService,
+            Collections.singleton(secondaryMockService));
         Assertions.assertEquals(32, servicePipeline.pump(new MockService.MockContext("Hello")).through(MockService.class)
+            .getResult().getInteger());
+        Assertions.assertEquals(999, servicePipeline.pump(new MockService.MockContext("potato")).through(MockService.class)
             .getResult().getInteger());
         Assertions.assertNotNull(servicePipeline.pump(new MockService.MockContext("oi")).through(MockService.class).getResultAsynchronously().get());
     }

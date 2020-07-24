@@ -21,16 +21,20 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
-package com.intellectualsites.services;
+package com.intellectualsites.services.mock;
 
-/**
- * Class that contains
- * @param <Context>
- * @param <Result>
- */
-public final class Services<Context, Result> {
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.function.Predicate;
 
-    Services() {
+public class SecondaryMockService implements MockService, Predicate<MockService.MockContext> {
+
+    @Nullable @Override public MockResult handle(@Nonnull final MockContext mockContext) {
+        return new MockResult(999);
+    }
+
+    @Override public boolean test(final MockContext mockContext) {
+        return mockContext.getString().equalsIgnoreCase("potato");
     }
 
 }

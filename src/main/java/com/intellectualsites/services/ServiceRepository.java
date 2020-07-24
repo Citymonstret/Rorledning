@@ -26,9 +26,12 @@ package com.intellectualsites.services;
 import com.google.common.reflect.TypeToken;
 
 import javax.annotation.Nonnull;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Predicate;
 
 /**
  * Repository that contains implementations for a given service type
@@ -57,11 +60,13 @@ public class ServiceRepository<Context, Response> {
      * Register a new implementation for the service
      *
      * @param service Implementation
+     * @param filters Filters that will be used to determine whether or not the service gets used
      * @param <T>     Type of the implementation
      */
-    public <T extends Service<Context, Response>> void registerImplementation(@Nonnull final T service) {
+    public <T extends Service<Context, Response>> void registerImplementation(@Nonnull final T service,
+        @Nonnull final Collection<Predicate<Context>> filters) {
         synchronized (this.lock) {
-            this.implementations.add(new ServiceWrapper<>(service));
+            this.implementations.add(new ServiceWrapper<>(service, filters));
         }
     }
 
@@ -85,14 +90,20 @@ public class ServiceRepository<Context, Response> {
 
         private final boolean defaultImplementation;
         private final T implementation;
+        private final Collection<Predicate<Context>> filters;
 
-        private ServiceWrapper(@Nonnull final T implementation) {
+        private ServiceWrapper(@Nonnull final T implementation, @Nonnull final Collection<Predicate<Context>> filters) {
             this.defaultImplementation = implementations.isEmpty();
             this.implementation = implementation;
+            this.filters = filters;
         }
 
         @Nonnull T getImplementation() {
             return this.implementation;
+        }
+
+        @Nonnull Collection<Predicate<Context>> getFilters() {
+            return Collections.unmodifiableCollection(this.filters);
         }
 
         boolean isDefaultImplementation() {

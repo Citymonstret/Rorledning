@@ -33,13 +33,13 @@ import javax.annotation.Nullable;
  * will have side effects. Those that do, should be clearly
  * labeled
  *
- * @param <Context>  Context type, this will be the input
- *                   that is used to generate the response
- * @param <Response> Response type, this is what is produced
- *                   by the service ("provided")
+ * @param <Context> Context type, this will be the input
+ *                  that is used to generate the response
+ * @param <Result>  Response type, this is what is produced
+ *                  by the service ("provided")
  */
 @FunctionalInterface
-public interface Service<Context, Response> {
+public interface Service<Context, Result> {
 
     /**
      * Provide a response for the given context. If the service implementation
@@ -47,10 +47,10 @@ public interface Service<Context, Response> {
      *
      * @param context Context used in the generation of the response
      * @return Response. If the response isn't {@code null}, the next
-     *         service in the service chain will get to act on the context.
-     *         Otherwise the execution halts, and the provided response is the
-     *         final response.
+     * service in the service chain will get to act on the context.
+     * Otherwise the execution halts, and the provided response is the
+     * final response.
      */
-    @Nullable Response handle(@Nonnull Context context);
+    @Nullable Result handle(@Nonnull Context context);
 
 }
