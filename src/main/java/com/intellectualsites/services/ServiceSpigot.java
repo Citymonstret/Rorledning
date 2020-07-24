@@ -28,6 +28,7 @@ import com.google.common.reflect.TypeToken;
 import javax.annotation.Nonnull;
 import java.util.Collections;
 import java.util.Queue;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Class that fo
@@ -38,13 +39,13 @@ import java.util.Queue;
 public final class ServiceSpigot<Context, Result> {
 
     private final Context context;
-    private final TypeToken<? extends Service<Context, Result>> type;
+    private final ServicePipeline pipeline;
     private final ServiceRepository<Context, Result> repository;
 
     ServiceSpigot(@Nonnull final ServicePipeline pipeline,
         @Nonnull final Context context, @Nonnull final TypeToken<? extends Service<Context, Result>> type) {
         this.context = context;
-        this.type = type;
+        this.pipeline = pipeline;
         this.repository = pipeline.getRepository(type);
     }
 
@@ -71,6 +72,19 @@ public final class ServiceSpigot<Context, Result> {
             }
         }
         throw new IllegalStateException("No service consumed the context. This means that the pipeline was not constructed properly.");
+    }
+
+    /**
+     * TODO: Redo this properly!
+     *
+     * Get the first result that is generated for the given context. This cannot return null. If
+     * nothing manages to produce a result, an exception will be thrown. If the pipeline has
+     * been constructed properly, this will never happen.
+     *
+     * @return Generated result
+     */
+    @Nonnull public CompletableFuture<Result> getResultAsynchronously() {
+        return CompletableFuture.supplyAsync(this::getResult, this.pipeline.getExecutor());
     }
 
 }

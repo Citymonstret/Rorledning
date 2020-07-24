@@ -28,6 +28,7 @@ import com.google.common.reflect.TypeToken;
 import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executor;
 
 /**
  * Service pipeline
@@ -36,9 +37,11 @@ public final class ServicePipeline {
 
     private final Object lock = new Object();
     private final Map<TypeToken<? extends Service<?, ?>>, ServiceRepository<?, ?>> repositories;
+    private final Executor executor;
 
-    ServicePipeline() {
+    ServicePipeline(@Nonnull final Executor executor) {
         this.repositories = new HashMap<>();
+        this.executor = executor;
     }
 
     /**
@@ -94,6 +97,10 @@ public final class ServicePipeline {
             throw new IllegalArgumentException(String.format("No service registered for type '%s'", type.toString()));
         }
         return repository;
+    }
+
+    @Nonnull Executor getExecutor() {
+        return this.executor;
     }
 
 }

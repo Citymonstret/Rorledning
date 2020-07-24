@@ -31,7 +31,7 @@ import org.junit.jupiter.api.Test;
 
 public class ServicesTest {
 
-    @Test public void testPipeline() {
+    @Test public void testPipeline() throws Exception {
         final ServicePipeline servicePipeline = ServicePipeline.builder().build();
         Assertions.assertNotNull(servicePipeline);
         servicePipeline.registerServiceType(TypeToken.of(MockService.class), new DefaultMockService());
@@ -40,6 +40,7 @@ public class ServicesTest {
         });
         Assertions.assertEquals(32, servicePipeline.pump(new MockService.MockContext("Hello")).through(MockService.class)
             .getResult().getInteger());
+        Assertions.assertNotNull(servicePipeline.pump(new MockService.MockContext("oi")).through(MockService.class).getResultAsynchronously().get());
     }
 
 }

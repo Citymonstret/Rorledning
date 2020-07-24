@@ -23,12 +23,18 @@
 //
 package com.intellectualsites.services;
 
+import com.google.common.base.Preconditions;
+
 import javax.annotation.Nonnull;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 /**
  * Builder for {@link ServicePipeline}
  */
 public final class ServicePipelineBuilder {
+
+    private Executor executor = Executors.newSingleThreadExecutor();
 
     ServicePipelineBuilder() {
     }
@@ -40,7 +46,19 @@ public final class ServicePipelineBuilder {
      * @return New service pipeline
      */
     @Nonnull public ServicePipeline build() {
-        return new ServicePipeline();
+        return new ServicePipeline(this.executor);
+    }
+
+    /**
+     * Set the executor that will be used by the pipeline when evaluating results asynchronously.
+     * Unless specified, the pipeline will use a single threaded executor.
+     *
+     * @param executor New executor
+     * @return Builder instance
+     */
+    @Nonnull public ServicePipelineBuilder withExecutor(@Nonnull final Executor executor) {
+        this.executor = Preconditions.checkNotNull(executor, "Executor may not be null");
+        return this;
     }
 
 }

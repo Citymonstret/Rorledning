@@ -27,7 +27,7 @@ package com.intellectualsites.services;
  * This indicates how a {@link Service} responded to a
  * given context
  */
-public enum Response {
+public enum State {
     /**
      * The service consumed the context
      * successfully and the execution should stop
