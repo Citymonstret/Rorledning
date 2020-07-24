@@ -39,6 +39,7 @@ import java.util.List;
  */
 public class ServiceRepository<Context, Response> {
 
+    private final Object lock = new Object();
     private final TypeToken<? extends Service<Context, Response>> serviceType;
     private final List<ServiceWrapper<? extends Service<Context, Response>>> implementations;
 
@@ -59,7 +60,9 @@ public class ServiceRepository<Context, Response> {
      * @param <T>     Type of the implementation
      */
     public <T extends Service<Context, Response>> void registerImplementation(@Nonnull final T service) {
-        this.implementations.add(new ServiceWrapper<>(service));
+        synchronized (this.lock) {
+            this.implementations.add(new ServiceWrapper<>(service));
+        }
     }
 
     /**
@@ -68,7 +71,9 @@ public class ServiceRepository<Context, Response> {
      * @return Queue containing all implementations
      */
     @Nonnull public Deque<ServiceWrapper<? extends Service<Context, Response>>> getQueue() {
-        return new LinkedList<>(this.implementations);
+        synchronized (this.lock) {
+            return new LinkedList<>(this.implementations);
+        }
     }
 
 
@@ -78,14 +83,20 @@ public class ServiceRepository<Context, Response> {
      */
     final class ServiceWrapper<T extends Service<Context, Response>> {
 
+        private final boolean defaultImplementation;
         private final T implementation;
 
         private ServiceWrapper(@Nonnull final T implementation) {
+            this.defaultImplementation = implementations.isEmpty();
             this.implementation = implementation;
         }
 
         @Nonnull T getImplementation() {
             return this.implementation;
+        }
+
+        boolean isDefaultImplementation() {
+            return this.defaultImplementation;
         }
 
         @Override public String toString() {

@@ -34,6 +34,7 @@ import java.util.Map;
  */
 public final class ServicePipeline {
 
+    private final Object lock = new Object();
     private final Map<TypeToken<? extends Service<?, ?>>, ServiceRepository<?, ?>> repositories;
 
     ServicePipeline() {
@@ -63,14 +64,15 @@ public final class ServicePipeline {
     public <Context, Result> ServicePipeline registerServiceType(
         @Nonnull final TypeToken<? extends Service<Context, Result>> type,
         @Nonnull final Service<Context, Result> defaultImplementation) {
-        if (repositories.containsKey(type)) {
-            throw new IllegalArgumentException(
-                String.format("Service of type '%s' has already been registered", type.toString()));
+        synchronized (this.lock) {
+            if (repositories.containsKey(type)) {
+                throw new IllegalArgumentException(String.format("Service of type '%s' has already been registered", type.toString()));
+            }
+            final ServiceRepository<Context, Result> repository = new ServiceRepository<>(type);
+            repository.registerImplementation(defaultImplementation);
+            this.repositories.put(type, repository);
+            return this;
         }
-        final ServiceRepository<Context, Result> repository = new ServiceRepository<>(type);
-        repository.registerImplementation(defaultImplementation);
-        this.repositories.put(type, repository);
-        return this;
     }
 
     /**

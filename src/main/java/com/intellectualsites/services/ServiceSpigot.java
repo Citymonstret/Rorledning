@@ -63,6 +63,9 @@ public final class ServiceSpigot<Context, Result> {
         ServiceRepository<Context, Result>.ServiceWrapper<? extends Service<Context, Result>> wrapper;
         while ((wrapper = queue.poll()) != null) {
             final Result result = wrapper.getImplementation().handle(this.context);
+            if (wrapper.getImplementation() instanceof SideEffectService && result == null) {
+                throw new IllegalStateException(String.format("SideEffectService '%s' returned null", wrapper.toString()));
+            }
             if (result != null) {
                 return result;
             }
