@@ -25,6 +25,7 @@ package com.intellectualsites.services;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.function.Function;
 
 /**
  * A service is anything that can take in a context, and
@@ -39,7 +40,7 @@ import javax.annotation.Nullable;
  *                  by the service ("provided")
  */
 @FunctionalInterface
-public interface Service<Context, Result> {
+public interface Service<Context, Result> extends Function<Context, Result> {
 
     /**
      * Provide a response for the given context. If the service implementation
@@ -52,5 +53,9 @@ public interface Service<Context, Result> {
      * final response.
      */
     @Nullable Result handle(@Nonnull Context context);
+
+    @Override default Result apply(@Nonnull Context context) {
+        return this.handle(context);
+    }
 
 }
