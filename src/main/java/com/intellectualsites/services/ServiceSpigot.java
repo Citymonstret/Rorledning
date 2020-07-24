@@ -94,4 +94,22 @@ public final class ServiceSpigot<Context, Result> {
         return CompletableFuture.supplyAsync(this::getResult, this.pipeline.getExecutor());
     }
 
+    /**
+     * Forward the request through the original pipeline.
+     *
+     * @return New pump, for the result of this request
+     */
+    @Nonnull public ServicePump<Result> forward() {
+        return this.pipeline.pump(this.getResult());
+    }
+
+    /**
+     * Forward the request through the original pipeline.
+     *
+     * @return New pump, for the result of this request
+     */
+    @Nonnull public CompletableFuture<ServicePump<Result>> forwardAsynchronously() {
+        return this.getResultAsynchronously().thenApply(pipeline::pump);
+    }
+
 }

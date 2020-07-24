@@ -33,12 +33,12 @@ import javax.annotation.Nonnull;
  *
  * @param <Context> Context to pump
  */
-public final class ServicePumper<Context> {
+public final class ServicePump<Context> {
 
     private final ServicePipeline servicePipeline;
     private final Context context;
 
-    ServicePumper(final ServicePipeline servicePipeline, final Context context) {
+    ServicePump(final ServicePipeline servicePipeline, final Context context) {
         this.servicePipeline = servicePipeline;
         this.context = context;
     }

@@ -132,8 +132,8 @@ public final class ServicePipeline {
      * @param <Context> Context type
      * @return Service pumper instance
      */
-    @Nonnull public <Context> ServicePumper<Context> pump(@Nonnull final Context context) {
-        return new ServicePumper<>(this, context);
+    @Nonnull public <Context> ServicePump<Context> pump(@Nonnull final Context context) {
+        return new ServicePump<>(this, context);
     }
 
     @Nonnull <Context, Result> ServiceRepository<Context, Result> getRepository(

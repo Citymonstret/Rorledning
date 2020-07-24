@@ -26,6 +26,7 @@ package com.intellectualsites.services;
 import com.google.common.reflect.TypeToken;
 import com.intellectualsites.services.mock.DefaultMockService;
 import com.intellectualsites.services.mock.DefaultSideEffectService;
+import com.intellectualsites.services.mock.MockResultConsumer;
 import com.intellectualsites.services.mock.MockService;
 import com.intellectualsites.services.mock.MockSideEffectService;
 import com.intellectualsites.services.mock.SecondaryMockService;
@@ -56,7 +57,7 @@ public class ServicesTest {
         Assertions.assertNotNull(servicePipeline.pump(new MockService.MockContext("oi")).through(MockService.class).getResultAsynchronously().get());
     }
 
-    @Test public void testSideEffectServices() throws Exception {
+    @Test public void testSideEffectServices() {
         final ServicePipeline servicePipeline = ServicePipeline.builder().build();
         servicePipeline.registerServiceType(TypeToken.of(MockSideEffectService.class), new DefaultSideEffectService());
         final MockSideEffectService.MockPlayer mockPlayer = new MockSideEffectService.MockPlayer(20);
@@ -66,6 +67,18 @@ public class ServicesTest {
         mockPlayer.setHealth(20);
         servicePipeline.registerServiceImplementation(MockSideEffectService.class, new SecondaryMockSideEffectService(), Collections.emptyList());
         Assertions.assertThrows(IllegalStateException.class, () -> servicePipeline.pump(mockPlayer).through(MockSideEffectService.class).getResult());
+    }
+
+    @Test public void testForwarding() throws Exception {
+        final ServicePipeline servicePipeline = ServicePipeline.builder().build().registerServiceType(TypeToken.of(MockService.class), new DefaultMockService())
+            .registerServiceType(TypeToken.of(MockResultConsumer.class), new MockResultConsumer());
+        Assertions.assertEquals(State.ACCEPTED, servicePipeline.pump(new MockService.MockContext("huh"))
+            .through(MockService.class).forward().through(MockResultConsumer.class).getResult());
+        Assertions.assertEquals(State.ACCEPTED, servicePipeline
+            .pump(new MockService.MockContext("Something"))
+            .through(MockService.class).forwardAsynchronously()
+            .thenApply(pump -> pump.through(MockResultConsumer.class))
+            .thenApply(ServiceSpigot::getResult).get());
     }
 
 }
