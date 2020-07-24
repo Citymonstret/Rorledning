@@ -25,19 +25,22 @@ package com.intellectualsites.services;
 
 import com.intellectualsites.services.types.Service;
 
-/**
- * This indicates how a {@link Service} responded to a
- * given context
- */
-public enum State {
-    /**
-     * The service consumed the context
-     * successfully and the execution should stop
-     */
-    ACCEPTED,
-    /**
-     * The service did not consume the context
-     * and the execution should continue
-     */
-    REJECTED
+import javax.annotation.Nonnull;
+import java.util.function.Predicate;
+
+enum  ServiceFilterHandler {
+    INSTANCE;
+
+    <Context> boolean passes(@Nonnull final ServiceRepository<Context, ?>
+        .ServiceWrapper<? extends Service<Context, ?>> service, @Nonnull final Context context) {
+        if (!service.isDefaultImplementation()) {
+            for (final Predicate<Context> predicate : service.getFilters()) {
+                if (!predicate.test(context)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
 }

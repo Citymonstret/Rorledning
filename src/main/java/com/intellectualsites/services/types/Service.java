@@ -21,7 +21,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
-package com.intellectualsites.services;
+package com.intellectualsites.services.types;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

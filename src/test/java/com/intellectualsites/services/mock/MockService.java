@@ -23,7 +23,7 @@
 //
 package com.intellectualsites.services.mock;
 
-import com.intellectualsites.services.Service;
+import com.intellectualsites.services.types.Service;
 
 import javax.annotation.Nonnull;
 

@@ -23,21 +23,14 @@
 //
 package com.intellectualsites.services;
 
-import com.intellectualsites.services.types.Service;
-
 /**
- * This indicates how a {@link Service} responded to a
- * given context
+ * Used to specify the relative priority of a service implementation
  */
-public enum State {
-    /**
-     * The service consumed the context
-     * successfully and the execution should stop
-     */
-    ACCEPTED,
-    /**
-     * The service did not consume the context
-     * and the execution should continue
-     */
-    REJECTED
+public enum ExecutionOrder {
+    LAST,
+    LATER,
+    LATE,
+    SOON,
+    SOONER,
+    FIRST
 }

@@ -24,6 +24,7 @@
 package com.intellectualsites.services;
 
 import com.google.common.reflect.TypeToken;
+import com.intellectualsites.services.types.Service;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;

@@ -24,11 +24,13 @@
 package com.intellectualsites.services;
 
 import com.google.common.reflect.TypeToken;
+import com.intellectualsites.services.annotations.Order;
+import com.intellectualsites.services.types.Service;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Deque;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Predicate;
@@ -38,13 +40,14 @@ import java.util.function.Predicate;
  *
  * @param <Context>  Service context
  * @param <Response> Service response type
- * @param <S>        Service type
  */
 public class ServiceRepository<Context, Response> {
 
     private final Object lock = new Object();
     private final TypeToken<? extends Service<Context, Response>> serviceType;
     private final List<ServiceWrapper<? extends Service<Context, Response>>> implementations;
+
+    private int registrationOrder = 0;
 
     /**
      * Create a new service repository for a given service type
@@ -75,7 +78,7 @@ public class ServiceRepository<Context, Response> {
      *
      * @return Queue containing all implementations
      */
-    @Nonnull public Deque<ServiceWrapper<? extends Service<Context, Response>>> getQueue() {
+    @Nonnull public LinkedList<ServiceWrapper<? extends Service<Context, Response>>> getQueue() {
         synchronized (this.lock) {
             return new LinkedList<>(this.implementations);
         }
@@ -86,16 +89,27 @@ public class ServiceRepository<Context, Response> {
      * Used to store {@link Service} implementations together
      * with their state
      */
-    final class ServiceWrapper<T extends Service<Context, Response>> {
+    final class ServiceWrapper<T extends Service<Context, Response>> implements Comparable<ServiceWrapper<T>> {
 
         private final boolean defaultImplementation;
         private final T implementation;
         private final Collection<Predicate<Context>> filters;
 
+        private final int registrationOrder = ServiceRepository.this.registrationOrder++;
+        private final ExecutionOrder executionOrder;
+
         private ServiceWrapper(@Nonnull final T implementation, @Nonnull final Collection<Predicate<Context>> filters) {
             this.defaultImplementation = implementations.isEmpty();
             this.implementation = implementation;
             this.filters = filters;
+            ExecutionOrder executionOrder = ExecutionOrder.SOON;
+            try {
+                final Order order = implementation.getClass().getAnnotation(Order.class);
+                if (order != null) {
+                    executionOrder = order.value();
+                }
+            } catch (final Exception ignored) {}
+            this.executionOrder = executionOrder;
         }
 
         @Nonnull T getImplementation() {
@@ -114,6 +128,13 @@ public class ServiceRepository<Context, Response> {
             return String
                 .format("ServiceWrapper{type=%s,implementation=%s}", serviceType.toString(),
                     TypeToken.of(implementation.getClass()).toString());
+        }
+
+        @Override public int compareTo(@Nonnull final ServiceWrapper<T> other) {
+            return Comparator.<ServiceWrapper<T>>comparingInt(wrapper -> wrapper.isDefaultImplementation() ? Integer.MIN_VALUE : Integer.MAX_VALUE)
+                .thenComparingInt(wrapper -> wrapper.executionOrder.ordinal())
+                .thenComparingInt(wrapper -> wrapper.registrationOrder)
+                .compare(this, other);
         }
 
     }

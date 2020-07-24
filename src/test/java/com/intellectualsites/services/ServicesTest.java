@@ -26,6 +26,8 @@ package com.intellectualsites.services;
 import com.google.common.reflect.TypeToken;
 import com.intellectualsites.services.mock.DefaultMockService;
 import com.intellectualsites.services.mock.DefaultSideEffectService;
+import com.intellectualsites.services.mock.MockOrderedFirst;
+import com.intellectualsites.services.mock.MockOrderedLast;
 import com.intellectualsites.services.mock.MockResultConsumer;
 import com.intellectualsites.services.mock.MockService;
 import com.intellectualsites.services.mock.MockSideEffectService;
@@ -79,6 +81,14 @@ public class ServicesTest {
             .through(MockService.class).forwardAsynchronously()
             .thenApply(pump -> pump.through(MockResultConsumer.class))
             .thenApply(ServiceSpigot::getResult).get());
+    }
+
+    @Test public void testSorting() {
+        final ServicePipeline servicePipeline = ServicePipeline.builder().build().registerServiceType(TypeToken.of(MockService.class), new DefaultMockService());
+        servicePipeline.registerServiceImplementation(MockService.class, new MockOrderedFirst(), Collections.emptyList());
+        servicePipeline.registerServiceImplementation(MockService.class, new MockOrderedLast(), Collections.emptyList());
+        // Test that the annotations worked
+        Assertions.assertEquals(1, servicePipeline.pump(new MockService.MockContext("")).through(MockService.class).getResult().getInteger());
     }
 
 }

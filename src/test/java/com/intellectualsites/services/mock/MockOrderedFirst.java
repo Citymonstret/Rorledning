@@ -21,23 +21,19 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
-package com.intellectualsites.services;
+package com.intellectualsites.services.mock;
 
-import com.intellectualsites.services.types.Service;
+import com.intellectualsites.services.ExecutionOrder;
+import com.intellectualsites.services.annotations.Order;
 
-/**
- * This indicates how a {@link Service} responded to a
- * given context
- */
-public enum State {
-    /**
-     * The service consumed the context
-     * successfully and the execution should stop
-     */
-    ACCEPTED,
-    /**
-     * The service did not consume the context
-     * and the execution should continue
-     */
-    REJECTED
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+@Order(ExecutionOrder.FIRST)
+public class MockOrderedFirst implements MockService {
+
+    @Nullable @Override public MockResult handle(@Nonnull final MockContext mockContext) {
+        return new MockResult(1);
+    }
+
 }

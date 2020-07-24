@@ -24,11 +24,12 @@
 package com.intellectualsites.services;
 
 import com.google.common.reflect.TypeToken;
+import com.intellectualsites.services.types.Service;
+import com.intellectualsites.services.types.SideEffectService;
 
 import javax.annotation.Nonnull;
-import java.util.Deque;
+import java.util.LinkedList;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Predicate;
 
 /**
  * Class that fo
@@ -59,16 +60,13 @@ public final class ServiceSpigot<Context, Result> {
      * @return Generated result
      */
     @Nonnull public Result getResult() {
-        final Deque<? extends ServiceRepository<Context, Result>.ServiceWrapper<? extends Service<Context, Result>>>
+        final LinkedList<? extends ServiceRepository<Context, Result>.ServiceWrapper<? extends Service<Context, Result>>>
             queue = this.repository.getQueue();
+        queue.sort(null); // Sort using the built in comparator method
         ServiceRepository<Context, Result>.ServiceWrapper<? extends Service<Context, Result>> wrapper;
-        outer: while ((wrapper = queue.pollLast()) != null) {
-            if (!wrapper.isDefaultImplementation()) {
-                for (final Predicate<Context> predicate : wrapper.getFilters()) {
-                    if (!predicate.test(this.context)) {
-                        continue outer;
-                    }
-                }
+        while ((wrapper = queue.pollLast()) != null) {
+            if (!ServiceFilterHandler.INSTANCE.passes(wrapper, this.context)) {
+                continue;
             }
             final Result result = wrapper.getImplementation().handle(this.context);
             if (wrapper.getImplementation() instanceof SideEffectService && result == null) {
@@ -82,8 +80,6 @@ public final class ServiceSpigot<Context, Result> {
     }
 
     /**
-     * TODO: Redo this properly!
-     *
      * Get the first result that is generated for the given context. This cannot return null. If
      * nothing manages to produce a result, an exception will be thrown. If the pipeline has
      * been constructed properly, this will never happen.

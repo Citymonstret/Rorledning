@@ -23,7 +23,7 @@
 //
 package com.intellectualsites.services.mock;
 
-import com.intellectualsites.services.SideEffectService;
+import com.intellectualsites.services.types.SideEffectService;
 
 public interface MockSideEffectService extends SideEffectService<MockSideEffectService.MockPlayer> {
 

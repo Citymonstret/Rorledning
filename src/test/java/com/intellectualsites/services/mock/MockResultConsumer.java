@@ -23,7 +23,7 @@
 //
 package com.intellectualsites.services.mock;
 
-import com.intellectualsites.services.SideEffectService;
+import com.intellectualsites.services.types.SideEffectService;
 import com.intellectualsites.services.State;
 
 import javax.annotation.Nonnull;
