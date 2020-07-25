@@ -23,8 +23,6 @@
 //
 package com.intellectualsites.services;
 
-import com.google.common.collect.ImmutableCollection;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.TypeToken;
 import com.intellectualsites.services.types.Service;
@@ -33,7 +31,6 @@ import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.concurrent.Executor;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 /**
  * Service pipeline
@@ -159,10 +156,11 @@ public final class ServicePipeline {
 
     /**
      * Get a collection of all the {@link TypeToken} of all implementations for a given type.
-     * @param type The {@link TypeToken} of the service to get implementations for.
+     *
+     * @param type      The {@link TypeToken} of the service to get implementations for.
      * @param <Context> The context type.
-     * @param <Result> The result type.
-     * @param <S> The service type.
+     * @param <Result>  The result type.
+     * @param <S>       The service type.
      * @return Returns an collection of the {@link TypeToken}s of the implementations for a given service.
      * Iterator order matches that of {@link ServiceRepository#getQueue()}
      */
