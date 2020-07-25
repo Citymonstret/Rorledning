@@ -23,16 +23,17 @@
 //
 package com.intellectualsites.services;
 
+import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.TypeToken;
 import com.intellectualsites.services.types.Service;
 
 import javax.annotation.Nonnull;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.Executor;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * Service pipeline
@@ -146,6 +147,32 @@ public final class ServicePipeline {
                 String.format("No service registered for type '%s'", type.toString()));
         }
         return repository;
+    }
+
+    /**
+     * Get a collection of all the recognised service types.
+     * @return Returns an Immutable collection of the service types registered.
+     */
+    @Nonnull public Collection<? extends TypeToken<?>> getRecognizedTypes() {
+        return ImmutableSet.copyOf(this.repositories.keySet());
+    }
+
+    /**
+     * Get a collection of all the {@link TypeToken} of all implementations for a given type.
+     * @param type The {@link TypeToken} of the service to get implementations for.
+     * @param <Context> The context type.
+     * @param <Result> The result type.
+     * @param <S> The service type.
+     * @return Returns an collection of the {@link TypeToken}s of the implementations for a given service.
+     * Iterator order matches that of {@link ServiceRepository#getQueue()}
+     */
+    @Nonnull public <Context, Result, S extends Service<Context, Result>> Collection<TypeToken<? extends S>> getImplementations(@Nonnull final TypeToken<S> type) {
+        ServiceRepository<Context, Result> repository = getRepository(type);
+        Collection<TypeToken<? extends S>> collection = new LinkedList<>();
+        for (ServiceRepository<Context, Result>.ServiceWrapper<? extends Service<Context, Result>> wrapper : repository.getQueue()) {
+            collection.add((TypeToken<? extends S>) TypeToken.of(wrapper.getImplementation().getClass()));
+        }
+        return collection;
     }
 
     @Nonnull Executor getExecutor() {
