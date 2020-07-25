@@ -141,9 +141,9 @@ public class ServicesTest {
             servicePipeline.getImplementations(mockServiceType);
         Assertions.assertEquals(3, impls.size());
         final Iterator<? extends TypeToken<?>> iterator = impls.iterator();
-        Assertions.assertEquals(TypeToken.of(DefaultMockService.class), iterator.next());
         Assertions.assertEquals(first, iterator.next());
         Assertions.assertEquals(last, iterator.next());
+        Assertions.assertEquals(DefaultMockService.class, iterator.next().getRawType());
     }
 
     @Test public void testAnnotatedMethods() throws Exception {

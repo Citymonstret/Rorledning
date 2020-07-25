@@ -32,6 +32,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.function.Predicate;
@@ -204,19 +205,22 @@ public final class ServicePipeline {
      * @param <Result>  The result type.
      * @param <S>       The service type.
      * @return Returns an collection of the {@link TypeToken}s of the implementations for a given service.
-     * Iterator order matches that of {@link ServiceRepository#getQueue()}
+     * Iterator order matches the priority when pumping contexts through the pipeline
      */
     @Nonnull
     public <Context, Result, S extends Service<Context, Result>> Collection<TypeToken<? extends S>> getImplementations(
         @Nonnull final TypeToken<S> type) {
         ServiceRepository<Context, Result> repository = getRepository(type);
-        Collection<TypeToken<? extends S>> collection = new LinkedList<>();
-        for (ServiceRepository<Context, Result>.ServiceWrapper<? extends Service<Context, Result>> wrapper : repository
-            .getQueue()) {
+        List<TypeToken<? extends S>> collection = new LinkedList<>();
+        final LinkedList<? extends ServiceRepository<Context, Result>.ServiceWrapper<? extends Service<Context, Result>>>
+            queue = repository.getQueue();
+        queue.sort(null);
+        Collections.reverse(queue);
+        for (ServiceRepository<Context, Result>.ServiceWrapper<? extends Service<Context, Result>> wrapper : queue) {
             collection
                 .add((TypeToken<? extends S>) TypeToken.of(wrapper.getImplementation().getClass()));
         }
-        return Collections.unmodifiableCollection(collection);
+        return Collections.unmodifiableList(collection);
     }
 
     @Nonnull Executor getExecutor() {

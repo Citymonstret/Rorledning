@@ -24,7 +24,6 @@
 package com.intellectualsites.services.types;
 
 import com.intellectualsites.services.ExecutionOrder;
-import com.intellectualsites.services.annotations.Order;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -67,14 +66,8 @@ public interface Service<Context, Result> extends Function<Context, Result> {
      *
      * @return Execution order
      */
-    @Nonnull default ExecutionOrder order() {
-        try {
-            final Order order = this.getClass().getAnnotation(Order.class);
-            if (order != null) {
-                return order.value();
-            }
-        } catch (final Exception ignored) {}
-        return ExecutionOrder.SOON;
+    @Nullable default ExecutionOrder order() {
+        return null;
     }
 
 }
