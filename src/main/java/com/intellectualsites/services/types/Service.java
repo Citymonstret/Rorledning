@@ -23,6 +23,9 @@
 //
 package com.intellectualsites.services.types;
 
+import com.intellectualsites.services.ExecutionOrder;
+import com.intellectualsites.services.annotations.Order;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.function.Function;
@@ -56,6 +59,22 @@ public interface Service<Context, Result> extends Function<Context, Result> {
 
     @Override default Result apply(@Nonnull Context context) {
         return this.handle(context);
+    }
+
+    /**
+     * Get the execution order of the service. This should not
+     * be overridden, unless you know what you are doing
+     *
+     * @return Execution order
+     */
+    @Nonnull default ExecutionOrder order() {
+        try {
+            final Order order = this.getClass().getAnnotation(Order.class);
+            if (order != null) {
+                return order.value();
+            }
+        } catch (final Exception ignored) {}
+        return ExecutionOrder.SOON;
     }
 
 }

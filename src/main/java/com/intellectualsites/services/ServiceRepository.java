@@ -24,7 +24,6 @@
 package com.intellectualsites.services;
 
 import com.google.common.reflect.TypeToken;
-import com.intellectualsites.services.annotations.Order;
 import com.intellectualsites.services.types.Service;
 
 import javax.annotation.Nonnull;
@@ -102,14 +101,7 @@ public final class ServiceRepository<Context, Response> {
             this.defaultImplementation = implementations.isEmpty();
             this.implementation = implementation;
             this.filters = filters;
-            ExecutionOrder executionOrder = ExecutionOrder.SOON;
-            try {
-                final Order order = implementation.getClass().getAnnotation(Order.class);
-                if (order != null) {
-                    executionOrder = order.value();
-                }
-            } catch (final Exception ignored) {}
-            this.executionOrder = executionOrder;
+            this.executionOrder = implementation.order();
         }
 
         @Nonnull T getImplementation() {
