@@ -27,6 +27,8 @@ import com.google.common.reflect.TypeToken;
 import com.intellectualsites.services.mock.AnnotatedMethodTest;
 import com.intellectualsites.services.mock.DefaultMockService;
 import com.intellectualsites.services.mock.DefaultSideEffectService;
+import com.intellectualsites.services.mock.InterruptingMockConsumer;
+import com.intellectualsites.services.mock.MockConsumerService;
 import com.intellectualsites.services.mock.MockOrderedFirst;
 import com.intellectualsites.services.mock.MockOrderedLast;
 import com.intellectualsites.services.mock.MockResultConsumer;
@@ -34,6 +36,7 @@ import com.intellectualsites.services.mock.MockService;
 import com.intellectualsites.services.mock.MockSideEffectService;
 import com.intellectualsites.services.mock.SecondaryMockService;
 import com.intellectualsites.services.mock.SecondaryMockSideEffectService;
+import com.intellectualsites.services.mock.StateSettingConsumerService;
 import com.intellectualsites.services.types.Service;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -154,6 +157,15 @@ public class ServicesTest {
         Assertions.assertEquals(testString.length(),
             servicePipeline.pump(new MockService.MockContext(testString)).through(MockService.class)
                 .getResult().getInteger());
+    }
+
+    @Test public void testConsumerServices() {
+        final ServicePipeline servicePipeline = ServicePipeline.builder().build()
+            .registerServiceType(TypeToken.of(MockConsumerService.class), new StateSettingConsumerService())
+            .registerServiceImplementation(MockConsumerService.class, new InterruptingMockConsumer(), Collections.emptyList());
+        final MockService.MockContext context = new MockService.MockContext("");
+        servicePipeline.pump(context).through(MockConsumerService.class).getResult();
+        Assertions.assertEquals("", context.getState());
     }
 
 }

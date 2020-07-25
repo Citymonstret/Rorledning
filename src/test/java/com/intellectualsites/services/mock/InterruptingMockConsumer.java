@@ -21,32 +21,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
-package com.intellectualsites.services.types;
+package com.intellectualsites.services.mock;
 
-import com.intellectualsites.services.State;
+import com.intellectualsites.services.types.ConsumerService;
 
 import javax.annotation.Nonnull;
 
-/**
- * Service implementation that alters the state of the owning application in some
- * way. A SideEffectService does not return a generated result, instead it
- * returns a response, indicating whether or not the context was consumed
- *
- * @param <Context>  Context type.
- */
-@FunctionalInterface
-public interface SideEffectService<Context> extends Service<Context, State> {
+public class InterruptingMockConsumer implements MockConsumerService {
 
-    /**
-     * Consumes the context, if possible. Returns {@link State#ACCEPTED} if
-     * the input was consumed, else {@link State#REJECTED}
-     *
-     * @param context context used in the generation of the response
-     * @return Response. If the response isn't {@link State#ACCEPTED}, the next
-     *         service in the service chain will get to act on the context.
-     *         Otherwise the execution halts, and the provided response is the
-     *         final response.
-     */
-    @Override @Nonnull State handle(@Nonnull final Context context);
+    @Override public void accept(@Nonnull final MockService.MockContext mockContext) {
+        ConsumerService.interrupt();
+    }
 
 }

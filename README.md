@@ -26,7 +26,7 @@ Rörledning is available from [IntellectualSites](https://intellectualsites.com)
 <dependency>
     <groupId>com.intellectualsites</groupId>
     <artifactId>Pipeline</artifactId>
-    <version>1.2-SNAPSHOT</version>
+    <version>1.3-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -280,3 +280,32 @@ that the method return type and parameter type match up wit the service context 
 result types, or you will get runtime exceptions when using the pipeline. 
 
 These methods are registered in ServicePipeline, using `registerMethods(yourClassInstance);`
+
+### ConsumerService
+
+Consumer services effectively turns the service pipeline into an event bus. Each implementation
+will get a chance to consume the incoming context, unless an implementation forcefully interrupts
+the execution, by calling `ConsumerService.interrupt()`
+
+**Examples:**
+
+```java
+public interface MockConsumerService extends ConsumerService<MockService.MockContext> {
+}
+
+public class InterruptingMockConsumer implements MockConsumerService {
+
+    @Override public void accept(@Nonnull final MockService.MockContext mockContext) {
+        ConsumerService.interrupt();
+    }
+
+}
+
+public class StateSettingConsumerService implements MockConsumerService {
+
+    @Override public void accept(@Nonnull final MockService.MockContext mockContext) {
+        mockContext.setState("");
+    }
+
+}
+```
