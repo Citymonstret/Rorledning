@@ -41,7 +41,7 @@ import java.util.function.Predicate;
  * @param <Context>  Service context
  * @param <Response> Service response type
  */
-public class ServiceRepository<Context, Response> {
+public final class ServiceRepository<Context, Response> {
 
     private final Object lock = new Object();
     private final TypeToken<? extends Service<Context, Response>> serviceType;
@@ -54,7 +54,7 @@ public class ServiceRepository<Context, Response> {
      *
      * @param serviceType Service type
      */
-    public ServiceRepository(@Nonnull final TypeToken<? extends Service<Context, Response>> serviceType) {
+    ServiceRepository(@Nonnull final TypeToken<? extends Service<Context, Response>> serviceType) {
         this.serviceType = serviceType;
         this.implementations = new LinkedList<>();
     }
@@ -66,7 +66,7 @@ public class ServiceRepository<Context, Response> {
      * @param filters Filters that will be used to determine whether or not the service gets used
      * @param <T>     Type of the implementation
      */
-    public <T extends Service<Context, Response>> void registerImplementation(@Nonnull final T service,
+    <T extends Service<Context, Response>> void registerImplementation(@Nonnull final T service,
         @Nonnull final Collection<Predicate<Context>> filters) {
         synchronized (this.lock) {
             this.implementations.add(new ServiceWrapper<>(service, filters));
@@ -78,7 +78,7 @@ public class ServiceRepository<Context, Response> {
      *
      * @return Queue containing all implementations
      */
-    @Nonnull public LinkedList<ServiceWrapper<? extends Service<Context, Response>>> getQueue() {
+    @Nonnull LinkedList<ServiceWrapper<? extends Service<Context, Response>>> getQueue() {
         synchronized (this.lock) {
             return new LinkedList<>(this.implementations);
         }

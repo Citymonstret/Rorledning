@@ -32,10 +32,10 @@ import java.util.LinkedList;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * Class that fo
+ * Class that outputs results from the given context, using the specified service type
  *
- * @param <Context>
- * @param <Result>
+ * @param <Context> Context type
+ * @param <Result>  Result type
  */
 public final class ServiceSpigot<Context, Result> {
 
@@ -43,16 +43,14 @@ public final class ServiceSpigot<Context, Result> {
     private final ServicePipeline pipeline;
     private final ServiceRepository<Context, Result> repository;
 
-    ServiceSpigot(@Nonnull final ServicePipeline pipeline,
-        @Nonnull final Context context, @Nonnull final TypeToken<? extends Service<Context, Result>> type) {
+    ServiceSpigot(@Nonnull final ServicePipeline pipeline, @Nonnull final Context context,
+        @Nonnull final TypeToken<? extends Service<Context, Result>> type) {
         this.context = context;
         this.pipeline = pipeline;
         this.repository = pipeline.getRepository(type);
     }
 
     /**
-     * TODO: Redo this properly!
-     *
      * Get the first result that is generated for the given context. This cannot return null. If
      * nothing manages to produce a result, an exception will be thrown. If the pipeline has
      * been constructed properly, this will never happen.
@@ -63,20 +61,26 @@ public final class ServiceSpigot<Context, Result> {
         final LinkedList<? extends ServiceRepository<Context, Result>.ServiceWrapper<? extends Service<Context, Result>>>
             queue = this.repository.getQueue();
         queue.sort(null); // Sort using the built in comparator method
-        ServiceRepository<Context, Result>.ServiceWrapper<? extends Service<Context, Result>> wrapper;
+        ServiceRepository<Context, Result>.ServiceWrapper<? extends Service<Context, Result>>
+            wrapper;
         while ((wrapper = queue.pollLast()) != null) {
             if (!ServiceFilterHandler.INSTANCE.passes(wrapper, this.context)) {
                 continue;
             }
             final Result result = wrapper.getImplementation().handle(this.context);
-            if (wrapper.getImplementation() instanceof SideEffectService && result == null) {
-                throw new IllegalStateException(String.format("SideEffectService '%s' returned null", wrapper.toString()));
-            }
-            if (result != null) {
+            if (wrapper.getImplementation() instanceof SideEffectService) {
+                if (result == null) {
+                    throw new IllegalStateException(
+                        String.format("SideEffectService '%s' returned null", wrapper.toString()));
+                } else if (result == State.ACCEPTED) {
+                    return result;
+                }
+            } else if (result != null) {
                 return result;
             }
         }
-        throw new IllegalStateException("No service consumed the context. This means that the pipeline was not constructed properly.");
+        throw new IllegalStateException(
+            "No service consumed the context. This means that the pipeline was not constructed properly.");
     }
 
     /**

@@ -1,15 +1,129 @@
 # Rörledning
 
-Upcoming java service framework
+This is a library that allows you to create services, that can have several different implementations.
+A service in this case, is anything that takes in a context, and spits out some sort of result, achieving
+some pre-determined task.
+
+Examples of services would be generators and caches.
+
+## Links
+
+- Discord: https://discord.gg/KxkjDVg
+
+## Maven
+
+Rörledning is available from [IntellectualSites](https://intellectualsites.com)' maven repository:
+
+```xml
+<repository>
+    <id>intellectualsites-snapshots</id>
+    <url>https://mvn.intellectualsites.com/content/repositories/snapshots</url>
+</repository>
+```
+
+```xml
+<dependency>
+    <groupId>com.intellectualsites</groupId>
+    <artifactId>Pipeline</artifactId>
+    <version>1.0-SNAPSHOT</version>
+</dependency>
+```
 
 ## Usage
 
-TODO: Write stuff here
+### ServicePipeline
+
+All requests start in the `ServicePipeline`. To get an instance of the `ServicePipeline`, simply use
+the service pipeline builder.
+
+**Example:**
+
+```java
+final ServicePipeline servicePipeline = ServicePipeline.builder().build();
+```
+
+### Service
+
+To implement a service, simply create an interface that extends `Service<Context, Result>`.
+The context is the type that gets pumped into the service (i.e, the value you provide), and the result
+is the type that gets produced by the service.
+
+The pipeline will attempt to generate a result from each service, until a service produces a non-null result.
+Thus, if a service cannot (or shouldn't) produce a result for a given context, it can simply return null.
+
+However, there's a catch to this. At least one service must always provide a result for every input.
+To ensure that this is the case, a default implementation of the service must be registered together
+with the service type. This implementation is not allowed to return null.
+
+**Examples:**
+
+Example Service:
+
+```java
+public interface MockService extends Service<MockService.MockContext, MockService.MockResult> {
+
+    class MockContext {
+
+        private final String string;
+
+        public MockContext(@Nonnull final String string) {
+            this.string = string;
+        }
+
+        @Nonnull public String getString() {
+            return this.string;
+        }
+
+    }
+
+    class MockResult {
+
+        private final int integer;
+
+        public MockResult(final int integer) {
+            this.integer = integer;
+        }
+
+        public int getInteger() {
+            return this.integer;
+        }
+
+    }
+
+}
+```
+
+Example Implementation:
+
+```java
+public class DefaultMockService implements MockService {
+
+    @Nullable @Override public MockResult handle(@Nonnull final MockContext mockContext) {
+        return new MockResult(32);
+    }
+
+}
+```
+
+Example Registration:
+
+```java
+servicePipeline.registerServiceType(TypeToken.of(MockService.class), new DefaultMockService());
+```
+
+Example Usage:
+
+```java
+final int result = servicePipeline.pump(new MockService.MockContext("Hello"))
+                                  .through(MockService.class)
+                                  .getResult()
+                                  .getInteger();
+```
 
 ### SideEffectService
 
 Some services may just alter the state of the incoming context, without generating any (useful) result.
-These services should implement `SideEffectService`.
+These services should extend `SideEffectService`.
 
 SideEffectService returns a State instead of a result. The service may either accept a context, in
 which case the execution chain is interrupted. It can also reject the context, in which case the
@@ -48,6 +162,43 @@ public class DefaultSideEffectService implements MockSideEffectService {
     }
 
 }
+```
+
+### Asynchronous Execution
+
+The pipeline results can be evaluated asynchronously. Simple use `getResultAsynchronously()`
+instead of `getResult()`. By default, a single threaded executor is used. A different executor
+can be supplied to the pipeline builder.
+
+### Filters
+
+Sometimes you may not want your service to respond to certain contexts. Instead of always
+returning null in those cases, filters can be used. These are simply predicates that take in your
+context type, and should be registered together with your implementation.
+
+**Example:**
+
+Example Filter:
+```java
+public class FilteredMockService implements MockService, Predicate<MockService.MockContext> {
+
+    @Nullable @Override public MockResult handle(@Nonnull final MockContext mockContext) {
+        return new MockResult(999);
+    }
+
+    @Override public boolean test(final MockContext mockContext) {
+        return mockContext.getString().equalsIgnoreCase("potato");
+    }
+
+}
+```
+
+Example Registration:
+
+```java
+final FilteredMockService service = new FilteredMockService();
+final List<Predicate<MockService.MockContext>> predicates = Collections.singletonList(service);
+servicePipeline.registerServiceImplementation(MockService.class, service, predicates);
 ```
 
 ### Forwarding
