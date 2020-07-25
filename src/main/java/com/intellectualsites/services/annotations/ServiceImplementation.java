@@ -34,8 +34,8 @@ import java.lang.annotation.Target;
  * Used to bind methods to services, like such:
  *
  * <pre>{@code
- * &#64;Nullable
- * &#64;ServiceImplementation(YourService.class)
+ * {@literal @}Nullable
+ * {@literal @}ServiceImplementation(YourService.class)
  * public YourResult handle(YourContext) {
  *      return result;
  * }
