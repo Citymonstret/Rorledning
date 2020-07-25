@@ -9,6 +9,7 @@ Examples of services would be generators and caches.
 ## Links
 
 - Discord: https://discord.gg/KxkjDVg
+- JavaDoc: https://plotsquared.com/docs/rörledning/
 
 ## Maven
 
