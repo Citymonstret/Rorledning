@@ -86,6 +86,43 @@ public final class ServicePipeline {
     }
 
     /**
+     * Scan a given class for methods annotated with {@link com.intellectualsites.services.annotations.ServiceImplementation}
+     * and register them as service implementations.
+     * <p>
+     * The methods should be of the form:
+     * <pre>{@code
+     * @Nullable
+     * @ServiceImplementation(YourService.class)
+     * public YourResult handle(YourContext) {
+     *      return result;
+     * }
+     * }</pre>
+     *
+     * @param instance Instance of the class to scan
+     * @param <T>      Type of the instance
+     * @return Service pipeline instance
+     * @throws Exception Any exceptions thrown during the registration process
+     */
+    public <T> ServicePipeline registerMethods(@Nonnull final T instance) throws Exception {
+        synchronized (this.lock) {
+            final Map<? extends Service<?, ?>, TypeToken<? extends Service<?, ?>>> services =
+                AnnotatedMethodServiceFactory.INSTANCE.lookupServices(instance);
+            for (final Map.Entry<? extends Service<?, ?>, TypeToken<? extends Service<?, ?>>> serviceEntry : services
+                .entrySet()) {
+                final TypeToken<? extends Service<?, ?>> type = serviceEntry.getValue();
+                final ServiceRepository<?, ?> repository = this.repositories.get(type);
+                if (repository == null) {
+                    throw new IllegalArgumentException(
+                        String.format("No service registered for type '%s'", type.toString()));
+                }
+                repository.<Service>registerImplementation(serviceEntry.getKey(),
+                    Collections.emptyList());
+            }
+        }
+        return this;
+    }
+
+    /**
      * Register a service implementation for a type that is recognized by the pipeline. It is
      * important that a call to {@link #registerServiceType(TypeToken, Service)} has been made
      * beforehand, otherwise a {@link IllegalArgumentException} will be thrown
@@ -169,11 +206,15 @@ public final class ServicePipeline {
      * @return Returns an collection of the {@link TypeToken}s of the implementations for a given service.
      * Iterator order matches that of {@link ServiceRepository#getQueue()}
      */
-    @Nonnull public <Context, Result, S extends Service<Context, Result>> Collection<TypeToken<? extends S>> getImplementations(@Nonnull final TypeToken<S> type) {
+    @Nonnull
+    public <Context, Result, S extends Service<Context, Result>> Collection<TypeToken<? extends S>> getImplementations(
+        @Nonnull final TypeToken<S> type) {
         ServiceRepository<Context, Result> repository = getRepository(type);
         Collection<TypeToken<? extends S>> collection = new LinkedList<>();
-        for (ServiceRepository<Context, Result>.ServiceWrapper<? extends Service<Context, Result>> wrapper : repository.getQueue()) {
-            collection.add((TypeToken<? extends S>) TypeToken.of(wrapper.getImplementation().getClass()));
+        for (ServiceRepository<Context, Result>.ServiceWrapper<? extends Service<Context, Result>> wrapper : repository
+            .getQueue()) {
+            collection
+                .add((TypeToken<? extends S>) TypeToken.of(wrapper.getImplementation().getClass()));
         }
         return Collections.unmodifiableCollection(collection);
     }

@@ -26,7 +26,7 @@ Rörledning is available from [IntellectualSites](https://intellectualsites.com)
 <dependency>
     <groupId>com.intellectualsites</groupId>
     <artifactId>Pipeline</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.1-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -263,3 +263,20 @@ No matter in which order MockOrderedFirst and MockOrderedLast are added, MockOrd
 handled before MockOrderedLast.
 
 The default order for all services is `SOON`.
+
+### Annotated Methods
+
+You can also implement services by using instance methods, like such:
+
+```java
+@ServiceImplementation(MockService.class)
+public MockService.MockResult handle(@Nonnull final MockService.MockContext context) {
+    return new MockService.MockResult(context.getString().length());
+}
+```
+
+The methods can also be annotated with the order annotation. Is is very important
+that the method return type and parameter type match up wit the service context and
+result types, or you will get runtime exceptions when using the pipeline. 
+
+These methods are registered in ServicePipeline, using `registerMethods(yourClassInstance);`

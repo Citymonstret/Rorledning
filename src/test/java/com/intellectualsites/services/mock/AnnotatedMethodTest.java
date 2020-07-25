@@ -21,20 +21,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
-package com.intellectualsites.services.annotations;
+package com.intellectualsites.services.mock;
 
-import com.intellectualsites.services.ExecutionOrder;
+import com.intellectualsites.services.annotations.ServiceImplementation;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import javax.annotation.Nonnull;
 
-/**
- * Used to specify the relative priority of a service implementation
- */
-@Target({ElementType.TYPE, ElementType.METHOD})
-@Retention(RetentionPolicy.RUNTIME)
-public @interface Order {
-    ExecutionOrder value() default ExecutionOrder.SOON;
+public class AnnotatedMethodTest {
+
+    @ServiceImplementation(MockService.class)
+    public MockService.MockResult handle(@Nonnull final MockService.MockContext context) {
+        return new MockService.MockResult(context.getString().length());
+    }
+
 }

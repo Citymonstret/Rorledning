@@ -23,7 +23,7 @@
 //
 package com.intellectualsites.services.annotations;
 
-import com.intellectualsites.services.ExecutionOrder;
+import com.intellectualsites.services.types.Service;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -31,10 +31,22 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Used to specify the relative priority of a service implementation
+ * Used to bind methods to services, like such:
+ *
+ * <pre>{@code
+ * @Nullable
+ * @ServiceImplementation(YourService.class)
+ * public YourResult handle(YourContext) {
+ *      return result;
+ * }
+ * }</pre>
  */
-@Target({ElementType.TYPE, ElementType.METHOD})
-@Retention(RetentionPolicy.RUNTIME)
-public @interface Order {
-    ExecutionOrder value() default ExecutionOrder.SOON;
+@Target(ElementType.METHOD) @Retention(RetentionPolicy.RUNTIME)
+public @interface ServiceImplementation {
+    /**
+     * The service class that the method implements
+     *
+     * @return Service to implement
+     */
+    Class<? extends Service<?, ?>> value();
 }
