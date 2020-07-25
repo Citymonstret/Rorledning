@@ -24,19 +24,14 @@
 package com.intellectualsites.services;
 
 import com.google.common.reflect.TypeToken;
-import com.intellectualsites.services.mock.DefaultMockService;
-import com.intellectualsites.services.mock.DefaultSideEffectService;
-import com.intellectualsites.services.mock.MockOrderedFirst;
-import com.intellectualsites.services.mock.MockOrderedLast;
-import com.intellectualsites.services.mock.MockResultConsumer;
-import com.intellectualsites.services.mock.MockService;
-import com.intellectualsites.services.mock.MockSideEffectService;
-import com.intellectualsites.services.mock.SecondaryMockService;
-import com.intellectualsites.services.mock.SecondaryMockSideEffectService;
+import com.intellectualsites.services.mock.*;
+import com.intellectualsites.services.types.Service;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 
 public class ServicesTest {
 
@@ -91,4 +86,35 @@ public class ServicesTest {
         Assertions.assertEquals(1, servicePipeline.pump(new MockService.MockContext("")).through(MockService.class).getResult().getInteger());
     }
 
+    @Test public void testRecognisedTypes() {
+        final ServicePipeline servicePipeline = ServicePipeline.builder().build()
+            .registerServiceType(TypeToken.of(MockService.class), new DefaultMockService());
+        Assertions.assertEquals(1, servicePipeline.getRecognizedTypes().size());
+    }
+
+    @Test public void testImplementationGetters() {
+        final ServicePipeline servicePipeline = ServicePipeline.builder().build()
+            .registerServiceType(TypeToken.of(MockService.class), new DefaultMockService());
+
+        servicePipeline.registerServiceImplementation(MockService.class, new MockOrderedFirst(),
+            Collections.emptyList());
+        servicePipeline.registerServiceImplementation(MockService.class, new MockOrderedLast(),
+            Collections.emptyList());
+
+        final TypeToken<? extends Service<?, ?>> first = TypeToken.of(MockOrderedFirst.class),
+            last = TypeToken.of(MockOrderedLast.class);
+
+        final TypeToken<MockService> mockServiceType = TypeToken.of(MockService.class);
+        for (TypeToken<?> typeToken : servicePipeline.getRecognizedTypes()) {
+            Assertions.assertEquals(mockServiceType, typeToken);
+        }
+        final Collection<? extends TypeToken<? extends Service<?, ?>>> impls =
+            servicePipeline.getImplementations(mockServiceType);
+
+        Assertions.assertEquals(3, impls.size());
+        final Iterator<? extends TypeToken<?>> iterator = impls.iterator();
+        Assertions.assertEquals(TypeToken.of(DefaultMockService.class), iterator.next());
+        Assertions.assertEquals(first, iterator.next());
+        Assertions.assertEquals(last, iterator.next());
+    }
 }
