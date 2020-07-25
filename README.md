@@ -6,6 +6,50 @@ Upcoming java service framework
 
 TODO: Write stuff here
 
+### SideEffectService
+
+Some services may just alter the state of the incoming context, without generating any (useful) result.
+These services should implement `SideEffectService`.
+
+SideEffectService returns a State instead of a result. The service may either accept a context, in
+which case the execution chain is interrupted. It can also reject the context, in which case the
+other services in the execution chain will get a chance to consume it.
+
+**Example:**
+
+```java
+public interface MockSideEffectService extends SideEffectService<MockSideEffectService.MockPlayer> {
+
+    class MockPlayer {
+
+        private int health;
+
+        public MockPlayer(final int health) {
+            this.health = health;
+        }
+
+        public int getHealth() {
+            return this.health;
+        }
+
+        public void setHealth(final int health) {
+            this.health = health;
+        }
+
+    }
+
+}
+
+public class DefaultSideEffectService implements MockSideEffectService {
+
+    @Nonnull @Override public State handle(@Nonnull final MockPlayer mockPlayer) {
+        mockPlayer.setHealth(0);
+        return State.ACCEPTED;
+    }
+
+}
+```
+
 ### Forwarding
 
 Sometimes it may be useful to use the result produced by a service as the context for another service.
