@@ -23,13 +23,16 @@
 //
 package com.intellectualsites.services;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.TypeToken;
 import com.intellectualsites.services.types.Service;
 
 import javax.annotation.Nonnull;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.function.Predicate;
 
@@ -172,7 +175,7 @@ public final class ServicePipeline {
         for (ServiceRepository<Context, Result>.ServiceWrapper<? extends Service<Context, Result>> wrapper : repository.getQueue()) {
             collection.add((TypeToken<? extends S>) TypeToken.of(wrapper.getImplementation().getClass()));
         }
-        return ImmutableList.of(collection);
+        return Collections.unmodifiableCollection(collection);
     }
 
     @Nonnull Executor getExecutor() {
