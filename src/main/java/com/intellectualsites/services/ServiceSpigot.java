@@ -24,6 +24,7 @@
 package com.intellectualsites.services;
 
 import com.google.common.reflect.TypeToken;
+import com.intellectualsites.services.types.ConsumerService;
 import com.intellectualsites.services.types.Service;
 import com.intellectualsites.services.types.SideEffectService;
 
@@ -63,7 +64,9 @@ public final class ServiceSpigot<Context, Result> {
         queue.sort(null); // Sort using the built in comparator method
         ServiceRepository<Context, Result>.ServiceWrapper<? extends Service<Context, Result>>
             wrapper;
+        boolean consumerService = false;
         while ((wrapper = queue.pollLast()) != null) {
+            consumerService = wrapper.getImplementation() instanceof ConsumerService;
             if (!ServiceFilterHandler.INSTANCE.passes(wrapper, this.context)) {
                 continue;
             }
@@ -78,6 +81,11 @@ public final class ServiceSpigot<Context, Result> {
             } else if (result != null) {
                 return result;
             }
+        }
+        // This is hack to make it so that the default
+        // consumer implementation does not have to call #interrupt
+        if (consumerService) {
+            return (Result) State.ACCEPTED;
         }
         throw new IllegalStateException(
             "No service consumed the context. This means that the pipeline was not constructed properly.");
