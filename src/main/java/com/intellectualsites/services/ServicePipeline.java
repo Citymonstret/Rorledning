@@ -23,6 +23,7 @@
 //
 package com.intellectualsites.services;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.TypeToken;
 import com.intellectualsites.services.types.Service;
@@ -148,6 +149,7 @@ public final class ServicePipeline {
 
     /**
      * Get a collection of all the recognised service types.
+     *
      * @return Returns an Immutable collection of the service types registered.
      */
     @Nonnull public Collection<? extends TypeToken<?>> getRecognizedTypes() {
@@ -170,7 +172,7 @@ public final class ServicePipeline {
         for (ServiceRepository<Context, Result>.ServiceWrapper<? extends Service<Context, Result>> wrapper : repository.getQueue()) {
             collection.add((TypeToken<? extends S>) TypeToken.of(wrapper.getImplementation().getClass()));
         }
-        return collection;
+        return ImmutableList.of(collection);
     }
 
     @Nonnull Executor getExecutor() {
