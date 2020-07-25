@@ -91,8 +91,8 @@ public final class ServicePipeline {
      * <p>
      * The methods should be of the form:
      * <pre>{@code
-     * @Nullable
-     * @ServiceImplementation(YourService.class)
+     * &#64;Nullable
+     * &#64;ServiceImplementation(YourService.class)
      * public YourResult handle(YourContext) {
      *      return result;
      * }
