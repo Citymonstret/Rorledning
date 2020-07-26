@@ -140,10 +140,11 @@ public class ServicesTest {
         for (TypeToken<?> typeToken : servicePipeline.getRecognizedTypes()) {
             Assertions.assertEquals(mockServiceType, typeToken);
         }
-        final Collection<? extends TypeToken<? extends Service<?, ?>>> impls =
-            servicePipeline.getImplementations(mockServiceType);
+        final Collection<? extends TypeToken<? extends Service<MockService.MockContext, MockService.MockResult>>>
+            impls = servicePipeline.getImplementations(mockServiceType);
         Assertions.assertEquals(3, impls.size());
-        final Iterator<? extends TypeToken<?>> iterator = impls.iterator();
+        final Iterator<? extends TypeToken<? extends Service<MockService.MockContext, MockService.MockResult>>>
+            iterator = impls.iterator();
         Assertions.assertEquals(first, iterator.next());
         Assertions.assertEquals(last, iterator.next());
         Assertions.assertEquals(DefaultMockService.class, iterator.next().getRawType());
