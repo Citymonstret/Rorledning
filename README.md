@@ -26,7 +26,7 @@ Rörledning is available from [IntellectualSites](https://intellectualsites.com)
 <dependency>
     <groupId>com.intellectualsites</groupId>
     <artifactId>Pipeline</artifactId>
-    <version>1.3-SNAPSHOT</version>
+    <version>1.4.0-SNAPSHOT</version>
 </dependency>
 ```
 

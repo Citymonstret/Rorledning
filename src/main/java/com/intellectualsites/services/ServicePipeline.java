@@ -23,7 +23,6 @@
 //
 package com.intellectualsites.services;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.TypeToken;
 import com.intellectualsites.services.types.Service;
 
@@ -193,8 +192,8 @@ public final class ServicePipeline {
      *
      * @return Returns an Immutable collection of the service types registered.
      */
-    @Nonnull public Collection<? extends TypeToken<?>> getRecognizedTypes() {
-        return ImmutableSet.copyOf(this.repositories.keySet());
+    @Nonnull public Collection<TypeToken<? extends Service<?, ?>>> getRecognizedTypes() {
+        return Collections.unmodifiableCollection(this.repositories.keySet());
     }
 
     /**
