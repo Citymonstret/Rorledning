@@ -309,3 +309,93 @@ public class StateSettingConsumerService implements MockConsumerService {
 
 }
 ```
+
+### Partial Result Services
+
+Sometimes you may need to get results for multiple contexts, but there is no guarantee
+that a single service will be able to generate all the needed results. It is then possible
+to make use of `PartialResultService`.
+
+The partial result service interface uses the `ChunkedRequestContext` class as the input, and
+outputs a map of request-response pairs.
+
+**Example:**
+
+Example Request Type:
+
+```java
+public class MockChunkedRequest extends ChunkedRequestContext<MockChunkedRequest.Animal, MockChunkedRequest.Sound> {
+
+    public MockChunkedRequest(@Nonnull final Collection<Animal> requests) {
+        super(requests);
+    }
+
+
+    public static class Animal {
+
+        private final String name;
+
+        public Animal(@Nonnull final String name) {
+            this.name = name;
+        }
+
+        @Nonnull public String getName() {
+            return this.name;
+        }
+    }
+
+    public static class Sound {
+
+        private final String sound;
+
+        public Sound(@Nonnull final String sound) {
+            this.sound = sound;
+        }
+
+        @Nonnull public String getSound() {
+            return this.sound;
+        }
+    }
+}
+```
+
+Example Service:
+```java
+public interface MockPartialResultService extends
+    PartialResultService<MockChunkedRequest.Animal, MockChunkedRequest.Sound, MockChunkedRequest> {
+}
+```
+
+Example Implementations:
+```java
+public class DefaultPartialRequestService implements MockPartialResultService {
+
+    @Nonnull @Override
+    public Map<MockChunkedRequest.Animal, MockChunkedRequest.Sound> handleRequests(
+        @Nonnull final List<MockChunkedRequest.Animal> requests) {
+        final Map<MockChunkedRequest.Animal, MockChunkedRequest.Sound> map = new HashMap<>(requests.size());
+        for (final MockChunkedRequest.Animal animal : requests) {
+            map.put(animal, new MockChunkedRequest.Sound("unknown"));
+        }
+        return map;
+    }
+
+}
+
+public class CompletingPartialResultService implements MockPartialResultService {
+
+    @Nonnull @Override public Map<MockChunkedRequest.Animal, MockChunkedRequest.Sound> handleRequests(
+        @Nonnull List<MockChunkedRequest.Animal> requests) {
+        final Map<MockChunkedRequest.Animal, MockChunkedRequest.Sound> map = new HashMap<>();
+        for (final MockChunkedRequest.Animal animal : requests) {
+            if (animal.getName().equals("cow")) {
+                map.put(animal, new MockChunkedRequest.Sound("moo"));
+            } else if (animal.getName().equals("dog")) {
+                map.put(animal, new MockChunkedRequest.Sound("woof"));
+            }
+        }
+        return map;
+    }
+
+}
+```

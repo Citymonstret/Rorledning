@@ -25,12 +25,16 @@ package com.intellectualsites.services;
 
 import com.google.common.reflect.TypeToken;
 import com.intellectualsites.services.mock.AnnotatedMethodTest;
+import com.intellectualsites.services.mock.CompletingPartialResultService;
 import com.intellectualsites.services.mock.DefaultMockService;
+import com.intellectualsites.services.mock.DefaultPartialRequestService;
 import com.intellectualsites.services.mock.DefaultSideEffectService;
 import com.intellectualsites.services.mock.InterruptingMockConsumer;
+import com.intellectualsites.services.mock.MockChunkedRequest;
 import com.intellectualsites.services.mock.MockConsumerService;
 import com.intellectualsites.services.mock.MockOrderedFirst;
 import com.intellectualsites.services.mock.MockOrderedLast;
+import com.intellectualsites.services.mock.MockPartialResultService;
 import com.intellectualsites.services.mock.MockResultConsumer;
 import com.intellectualsites.services.mock.MockService;
 import com.intellectualsites.services.mock.MockSideEffectService;
@@ -41,9 +45,11 @@ import com.intellectualsites.services.types.Service;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.UUID;
 
 public class ServicesTest {
@@ -162,11 +168,30 @@ public class ServicesTest {
 
     @Test public void testConsumerServices() {
         final ServicePipeline servicePipeline = ServicePipeline.builder().build()
-            .registerServiceType(TypeToken.of(MockConsumerService.class), new StateSettingConsumerService())
-            .registerServiceImplementation(MockConsumerService.class, new InterruptingMockConsumer(), Collections.emptyList());
+            .registerServiceType(TypeToken.of(MockConsumerService.class),
+                new StateSettingConsumerService())
+            .registerServiceImplementation(MockConsumerService.class,
+                new InterruptingMockConsumer(), Collections.emptyList());
         final MockService.MockContext context = new MockService.MockContext("");
         servicePipeline.pump(context).through(MockConsumerService.class).getResult();
         Assertions.assertEquals("", context.getState());
+    }
+
+    @Test public void testPartialResultServices() {
+        final ServicePipeline servicePipeline = ServicePipeline.builder().build()
+            .registerServiceType(TypeToken.of(MockPartialResultService.class),
+                new DefaultPartialRequestService())
+            .registerServiceImplementation(MockPartialResultService.class,
+                new CompletingPartialResultService(), Collections.emptyList());
+        final MockChunkedRequest.Animal cow = new MockChunkedRequest.Animal("cow");
+        final MockChunkedRequest.Animal dog = new MockChunkedRequest.Animal("dog");
+        final MockChunkedRequest.Animal cat = new MockChunkedRequest.Animal("cat");
+        final Map<MockChunkedRequest.Animal, MockChunkedRequest.Sound> sounds =
+            servicePipeline.pump(new MockChunkedRequest(Arrays.asList(cow, dog, cat)))
+                .through(MockPartialResultService.class).getResult();
+        Assertions.assertEquals("moo", sounds.get(cow).getSound());
+        Assertions.assertEquals("woof", sounds.get(dog).getSound());
+        Assertions.assertEquals("unknown", sounds.get(cat).getSound());
     }
 
 }
