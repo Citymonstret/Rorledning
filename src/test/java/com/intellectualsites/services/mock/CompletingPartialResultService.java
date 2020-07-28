@@ -30,18 +30,19 @@ import java.util.Map;
 
 public class CompletingPartialResultService implements MockPartialResultService {
 
-    @Nonnull @Override
-    public Map<MockChunkedRequest.Animal, MockChunkedRequest.Sound> handleRequests(
-        @Nonnull List<MockChunkedRequest.Animal> requests) {
-        final Map<MockChunkedRequest.Animal, MockChunkedRequest.Sound> map = new HashMap<>();
-        for (final MockChunkedRequest.Animal animal : requests) {
-            if (animal.getName().equals("cow")) {
-                map.put(animal, new MockChunkedRequest.Sound("moo"));
-            } else if (animal.getName().equals("dog")) {
-                map.put(animal, new MockChunkedRequest.Sound("woof"));
-            }
-        }
-        return map;
+  @Nonnull
+  @Override
+  public Map<MockChunkedRequest.Animal, MockChunkedRequest.Sound> handleRequests(
+      @Nonnull List<MockChunkedRequest.Animal> requests) {
+    final Map<MockChunkedRequest.Animal, MockChunkedRequest.Sound> map = new HashMap<>();
+    for (final MockChunkedRequest.Animal animal : requests) {
+      if (animal.getName().equals("cow")) {
+        map.put(animal, new MockChunkedRequest.Sound("moo"));
+      } else if (animal.getName().equals("dog")) {
+        map.put(animal, new MockChunkedRequest.Sound("woof"));
+      }
     }
+    return map;
+  }
 
 }

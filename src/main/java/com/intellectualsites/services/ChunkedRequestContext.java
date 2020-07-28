@@ -24,16 +24,11 @@
 package com.intellectualsites.services;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
- * This class represents a request that can be fulfilled by one,
- * or multiple services, for one or more objects
+ * This class represents a request that can be fulfilled by one, or multiple services, for one or
+ * more objects
  *
  * @param <Context> Context/Request type
  * @param <Result>  Result type
@@ -54,27 +49,29 @@ public abstract class ChunkedRequestContext<Context, Result> {
         this.results = new HashMap<>(requests.size());
     }
 
-    /**
-     * Get a view of the (currently) available results
-     *
-     * @return Unmodifiable map of results
-     */
-    @Nonnull public final Map<Context, Result> getAvailableResults() {
-        synchronized (this.lock) {
-            return Collections.unmodifiableMap(this.results);
-        }
+  /**
+   * Get a view of the (currently) available results
+   *
+   * @return Unmodifiable map of results
+   */
+  @Nonnull
+  public final Map<Context, Result> getAvailableResults() {
+    synchronized (this.lock) {
+      return Collections.unmodifiableMap(this.results);
     }
+  }
 
-    /**
-     * Get all remaining requests
-     *
-     * @return Unmodifiable list of remaining requests
-     */
-    @Nonnull public final List<Context> getRemaining() {
-        synchronized (this.lock) {
-            return Collections.unmodifiableList(this.requests);
-        }
+  /**
+   * Get all remaining requests
+   *
+   * @return Unmodifiable list of remaining requests
+   */
+  @Nonnull
+  public final List<Context> getRemaining() {
+    synchronized (this.lock) {
+      return Collections.unmodifiableList(this.requests);
     }
+  }
 
     /**
      * Store a result for a specific context
@@ -89,12 +86,11 @@ public abstract class ChunkedRequestContext<Context, Result> {
         }
     }
 
-    /**
-     * Check if the request has been completed
-     *
-     * @return {@code true} if the request has been completed,
-     * {@code false} if not
-     */
+  /**
+   * Check if the request has been completed
+   *
+   * @return {@code true} if the request has been completed, {@code false} if not
+   */
     public final boolean isCompleted() {
         synchronized (this.lock) {
             return this.requests.isEmpty();

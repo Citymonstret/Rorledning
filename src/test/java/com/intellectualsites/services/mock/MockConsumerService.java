@@ -26,4 +26,5 @@ package com.intellectualsites.services.mock;
 import com.intellectualsites.services.types.ConsumerService;
 
 public interface MockConsumerService extends ConsumerService<MockService.MockContext> {
+
 }

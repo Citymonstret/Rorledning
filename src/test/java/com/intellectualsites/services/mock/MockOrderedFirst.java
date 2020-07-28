@@ -32,8 +32,10 @@ import javax.annotation.Nullable;
 @Order(ExecutionOrder.FIRST)
 public class MockOrderedFirst implements MockService {
 
-    @Nullable @Override public MockResult handle(@Nonnull final MockContext mockContext) {
-        return new MockResult(1);
-    }
+  @Nullable
+  @Override
+  public MockResult handle(@Nonnull final MockContext mockContext) {
+    return new MockResult(1);
+  }
 
 }

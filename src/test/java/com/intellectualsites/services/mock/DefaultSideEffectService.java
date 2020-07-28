@@ -29,9 +29,11 @@ import javax.annotation.Nonnull;
 
 public class DefaultSideEffectService implements MockSideEffectService {
 
-    @Nonnull @Override public State handle(@Nonnull final MockPlayer mockPlayer) {
-        mockPlayer.setHealth(0);
-        return State.ACCEPTED;
-    }
+  @Nonnull
+  @Override
+  public State handle(@Nonnull final MockPlayer mockPlayer) {
+    mockPlayer.setHealth(0);
+    return State.ACCEPTED;
+  }
 
 }

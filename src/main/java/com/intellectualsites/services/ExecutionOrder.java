@@ -26,6 +26,7 @@ package com.intellectualsites.services;
 /**
  * Used to specify the relative priority of a service implementation
  */
-@SuppressWarnings("unused") public enum ExecutionOrder {
-    LAST, LATER, LATE, SOON, SOONER, FIRST
+@SuppressWarnings("unused")
+public enum ExecutionOrder {
+  LAST, LATER, LATE, SOON, SOONER, FIRST
 }

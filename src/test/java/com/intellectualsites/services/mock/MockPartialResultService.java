@@ -27,4 +27,5 @@ import com.intellectualsites.services.types.PartialResultService;
 
 public interface MockPartialResultService extends
     PartialResultService<MockChunkedRequest.Animal, MockChunkedRequest.Sound, MockChunkedRequest> {
+
 }

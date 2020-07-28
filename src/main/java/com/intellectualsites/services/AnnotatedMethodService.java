@@ -42,51 +42,57 @@ class AnnotatedMethodService<Context, Result> implements Service<Context, Result
 
     AnnotatedMethodService(@Nonnull final Object instance, @Nonnull final Method method)
         throws Exception {
-        ExecutionOrder executionOrder = ExecutionOrder.SOON;
-        try {
-            final Order order = method.getAnnotation(Order.class);
-            if (order != null) {
-                executionOrder = order.value();
-            }
-        } catch (final Exception ignored) {
+      ExecutionOrder executionOrder = ExecutionOrder.SOON;
+      try {
+        final Order order = method.getAnnotation(Order.class);
+        if (order != null) {
+          executionOrder = order.value();
         }
-        this.instance = instance;
-        this.executionOrder = executionOrder;
-        method.setAccessible(true);
-        this.methodHandle = MethodHandles.lookup().unreflect(method);
-        this.method = method;
+      } catch (final Exception ignored) {
+      }
+      this.instance = instance;
+      this.executionOrder = executionOrder;
+      method.setAccessible(true);
+      this.methodHandle = MethodHandles.lookup().unreflect(method);
+      this.method = method;
     }
 
-    @Nullable @Override @SuppressWarnings("unchecked")
-    public Result handle(@Nonnull Context context) {
-        try {
-            return (Result) this.methodHandle.invoke(this.instance, context);
-        } catch (final Throwable throwable) {
-            new IllegalStateException(String
-                .format("Failed to call method service implementation '%s' in class '%s'",
-                    method.getName(), instance.getClass().getCanonicalName()), throwable)
-                .printStackTrace();
-        }
-        return null;
+  @Nullable
+  @Override
+  @SuppressWarnings("unchecked")
+  public Result handle(@Nonnull Context context) {
+    try {
+      return (Result) this.methodHandle.invoke(this.instance, context);
+    } catch (final Throwable throwable) {
+      new IllegalStateException(String
+          .format("Failed to call method service implementation '%s' in class '%s'",
+              method.getName(), instance.getClass().getCanonicalName()), throwable)
+          .printStackTrace();
     }
+    return null;
+  }
 
-    @Nonnull @Override public ExecutionOrder order() {
-        return this.executionOrder;
-    }
+  @Nonnull
+  @Override
+  public ExecutionOrder order() {
+    return this.executionOrder;
+  }
 
-    @Override public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        final AnnotatedMethodService<?, ?> that = (AnnotatedMethodService<?, ?>) o;
-        return Objects.equal(this.methodHandle, that.methodHandle);
+  @Override
+  public boolean equals(final Object o) {
+    if (this == o) {
+      return true;
     }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    final AnnotatedMethodService<?, ?> that = (AnnotatedMethodService<?, ?>) o;
+    return Objects.equal(this.methodHandle, that.methodHandle);
+  }
 
-    @Override public int hashCode() {
-        return Objects.hashCode(this.methodHandle);
-    }
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(this.methodHandle);
+  }
 
 }

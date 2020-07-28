@@ -28,11 +28,7 @@ import com.intellectualsites.services.annotations.Order;
 import com.intellectualsites.services.types.Service;
 
 import javax.annotation.Nonnull;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.function.Predicate;
 
 /**
@@ -67,7 +63,7 @@ public final class ServiceRepository<Context, Response> {
      * @param <T>     Type of the implementation
      */
     <T extends Service<Context, Response>> void registerImplementation(@Nonnull final T service,
-        @Nonnull final Collection<Predicate<Context>> filters) {
+                                                                       @Nonnull final Collection<Predicate<Context>> filters) {
         synchronized (this.lock) {
             this.implementations.add(new ServiceWrapper<>(service, filters));
         }
@@ -78,7 +74,8 @@ public final class ServiceRepository<Context, Response> {
      *
      * @return Queue containing all implementations
      */
-    @Nonnull LinkedList<ServiceWrapper<? extends Service<Context, Response>>> getQueue() {
+    @Nonnull
+    LinkedList<ServiceWrapper<? extends Service<Context, Response>>> getQueue() {
         synchronized (this.lock) {
             return new LinkedList<>(this.implementations);
         }
@@ -86,11 +83,10 @@ public final class ServiceRepository<Context, Response> {
 
 
     /**
-     * Used to store {@link Service} implementations together
-     * with their state
+     * Used to store {@link Service} implementations together with their state
      */
     final class ServiceWrapper<T extends Service<Context, Response>>
-        implements Comparable<ServiceWrapper<T>> {
+            implements Comparable<ServiceWrapper<T>> {
 
         private final boolean defaultImplementation;
         private final T implementation;
@@ -100,7 +96,7 @@ public final class ServiceRepository<Context, Response> {
         private final ExecutionOrder executionOrder;
 
         private ServiceWrapper(@Nonnull final T implementation,
-            @Nonnull final Collection<Predicate<Context>> filters) {
+                               @Nonnull final Collection<Predicate<Context>> filters) {
             this.defaultImplementation = implementations.isEmpty();
             this.implementation = implementation;
             this.filters = filters;
@@ -116,11 +112,13 @@ public final class ServiceRepository<Context, Response> {
             this.executionOrder = executionOrder;
         }
 
-        @Nonnull T getImplementation() {
+        @Nonnull
+        T getImplementation() {
             return this.implementation;
         }
 
-        @Nonnull Collection<Predicate<Context>> getFilters() {
+        @Nonnull
+        Collection<Predicate<Context>> getFilters() {
             return Collections.unmodifiableCollection(this.filters);
         }
 
@@ -128,18 +126,20 @@ public final class ServiceRepository<Context, Response> {
             return this.defaultImplementation;
         }
 
-        @Override public String toString() {
+        @Override
+        public String toString() {
             return String
-                .format("ServiceWrapper{type=%s,implementation=%s}", serviceType.toString(),
-                    TypeToken.of(implementation.getClass()).toString());
+                    .format("ServiceWrapper{type=%s,implementation=%s}", serviceType.toString(),
+                            TypeToken.of(implementation.getClass()).toString());
         }
 
-        @Override public int compareTo(@Nonnull final ServiceWrapper<T> other) {
+        @Override
+        public int compareTo(@Nonnull final ServiceWrapper<T> other) {
             return Comparator.<ServiceWrapper<T>>comparingInt(
-                wrapper -> wrapper.isDefaultImplementation() ?
-                    Integer.MIN_VALUE :
-                    Integer.MAX_VALUE).thenComparingInt(wrapper -> wrapper.executionOrder.ordinal())
-                .thenComparingInt(wrapper -> wrapper.registrationOrder).compare(this, other);
+                    wrapper -> wrapper.isDefaultImplementation() ?
+                            Integer.MIN_VALUE :
+                            Integer.MAX_VALUE).thenComparingInt(wrapper -> wrapper.executionOrder.ordinal())
+                    .thenComparingInt(wrapper -> wrapper.registrationOrder).compare(this, other);
         }
 
     }

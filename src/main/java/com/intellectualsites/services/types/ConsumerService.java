@@ -29,56 +29,62 @@ import javax.annotation.Nonnull;
 import java.util.function.Consumer;
 
 /**
- * Service type where each implementation gets a chance to consume the context. This
- * service type effectively turns the pipeline into an event bus.
+ * Service type where each implementation gets a chance to consume the context. This service type
+ * effectively turns the pipeline into an event bus.
  * <p>
  * A service can forcefully terminate execution by calling {@link #interrupt()}
  *
  * @param <Context> Context
  */
-@FunctionalInterface public interface ConsumerService<Context>
+@FunctionalInterface
+public interface ConsumerService<Context>
     extends SideEffectService<Context>, Consumer<Context> {
 
-    /**
-     * Immediately terminate the execution and return {@link State#ACCEPTED}
-     *
-     * @throws PipeBurst Pipe burst
-     */
-    static void interrupt() throws PipeBurst {
-        throw new PipeBurst();
+  /**
+   * Immediately terminate the execution and return {@link State#ACCEPTED}
+   *
+   * @throws PipeBurst Pipe burst
+   */
+  static void interrupt() throws PipeBurst {
+    throw new PipeBurst();
+  }
+
+  @Nonnull
+  @Override
+  default State handle(@Nonnull final Context context) {
+    try {
+      this.accept(context);
+    } catch (final PipeBurst burst) {
+      return State.ACCEPTED;
+    }
+    return State.REJECTED;
+  }
+
+  /**
+   * Accept the context. Call {@link #interrupt()} to interrupt the entire pipeline and immediately
+   * return {@link State#ACCEPTED} to the sink
+   *
+   * @param context Context to consume
+   */
+  @Override
+  void accept(@Nonnull Context context);
+
+
+  class PipeBurst extends RuntimeException {
+
+    private PipeBurst() {
     }
 
-    @Nonnull @Override default State handle(@Nonnull final Context context) {
-        try {
-            this.accept(context);
-        } catch (final PipeBurst burst) {
-            return State.ACCEPTED;
-        }
-        return State.REJECTED;
+    @Override
+    public synchronized Throwable fillInStackTrace() {
+      return this;
     }
 
-    /**
-     * Accept the context. Call {@link #interrupt()} to interrupt the
-     * entire pipeline and immediately return {@link State#ACCEPTED} to the sink
-     *
-     * @param context Context to consume
-     */
-    @Override void accept(@Nonnull Context context);
-
-
-    class PipeBurst extends RuntimeException {
-
-        private PipeBurst() {
-        }
-
-        @Override public synchronized Throwable fillInStackTrace() {
-            return this;
-        }
-
-        @Override public synchronized Throwable initCause(final Throwable cause) {
-            return this;
-        }
-
+    @Override
+    public synchronized Throwable initCause(final Throwable cause) {
+      return this;
     }
+
+  }
 
 }

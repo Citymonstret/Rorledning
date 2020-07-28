@@ -29,8 +29,9 @@ import javax.annotation.Nonnull;
 
 public class InterruptingMockConsumer implements MockConsumerService {
 
-    @Override public void accept(@Nonnull final MockService.MockContext mockContext) {
-        ConsumerService.interrupt();
-    }
+  @Override
+  public void accept(@Nonnull final MockService.MockContext mockContext) {
+    ConsumerService.interrupt();
+  }
 
 }

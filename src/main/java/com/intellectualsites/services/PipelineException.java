@@ -28,8 +28,7 @@ import javax.annotation.Nonnull;
 /**
  * Wrapper for exceptions thrown during pipeline execution.
  *
- * @see #getCause() Use {@link #getCause()} to get the
- * wrapped exception
+ * @see #getCause() Use {@link #getCause()} to get the wrapped exception
  */
 public final class PipelineException extends RuntimeException {
 

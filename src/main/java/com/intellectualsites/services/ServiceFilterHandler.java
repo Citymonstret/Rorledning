@@ -31,9 +31,9 @@ import java.util.function.Predicate;
 enum ServiceFilterHandler {
     INSTANCE;
 
-    <Context> boolean passes(@Nonnull
-    final ServiceRepository<Context, ?>.ServiceWrapper<? extends Service<Context, ?>> service,
-        @Nonnull final Context context) {
+    <Context> boolean passes(
+            @Nonnull final ServiceRepository<Context, ?>.ServiceWrapper<? extends Service<Context, ?>> service,
+            @Nonnull final Context context) {
         if (!service.isDefaultImplementation()) {
             for (final Predicate<Context> predicate : service.getFilters()) {
                 try {
@@ -42,8 +42,8 @@ enum ServiceFilterHandler {
                     }
                 } catch (final Exception e) {
                     throw new PipelineException(String
-                        .format("Failed to evaluate filter '%s' for '%s'",
-                            predicate.getClass().getCanonicalName(), service.toString()), e);
+                            .format("Failed to evaluate filter '%s' for '%s'",
+                                    predicate.getClass().getCanonicalName(), service.toString()), e);
                 }
             }
         }

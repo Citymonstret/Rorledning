@@ -28,18 +28,20 @@ import javax.annotation.Nullable;
 
 public class DefaultMockService implements MockService {
 
-    @Nullable @Override public MockResult handle(@Nonnull final MockContext mockContext)
-        throws Exception {
-        if (mockContext.getString().equals("pls throw exception")) {
-            throw new TotallyIntentionalException();
-        }
-        return new MockResult(32);
+  @Nullable
+  @Override
+  public MockResult handle(@Nonnull final MockContext mockContext)
+      throws Exception {
+    if (mockContext.getString().equals("pls throw exception")) {
+      throw new TotallyIntentionalException();
     }
+    return new MockResult(32);
+  }
 
 
-    public static class TotallyIntentionalException extends Exception {
+  public static class TotallyIntentionalException extends Exception {
 
-    }
+  }
 
 }
 

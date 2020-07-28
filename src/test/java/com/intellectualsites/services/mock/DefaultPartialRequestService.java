@@ -30,15 +30,16 @@ import java.util.Map;
 
 public class DefaultPartialRequestService implements MockPartialResultService {
 
-    @Nonnull @Override
-    public Map<MockChunkedRequest.Animal, MockChunkedRequest.Sound> handleRequests(
-        @Nonnull final List<MockChunkedRequest.Animal> requests) {
-        final Map<MockChunkedRequest.Animal, MockChunkedRequest.Sound> map =
-            new HashMap<>(requests.size());
-        for (final MockChunkedRequest.Animal animal : requests) {
-            map.put(animal, new MockChunkedRequest.Sound("unknown"));
-        }
-        return map;
+  @Nonnull
+  @Override
+  public Map<MockChunkedRequest.Animal, MockChunkedRequest.Sound> handleRequests(
+      @Nonnull final List<MockChunkedRequest.Animal> requests) {
+    final Map<MockChunkedRequest.Animal, MockChunkedRequest.Sound> map =
+        new HashMap<>(requests.size());
+    for (final MockChunkedRequest.Animal animal : requests) {
+      map.put(animal, new MockChunkedRequest.Sound("unknown"));
     }
+    return map;
+  }
 
 }

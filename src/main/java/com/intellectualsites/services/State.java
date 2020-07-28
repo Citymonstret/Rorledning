@@ -26,18 +26,15 @@ package com.intellectualsites.services;
 import com.intellectualsites.services.types.Service;
 
 /**
- * This indicates how a {@link Service} responded to a
- * given context
+ * This indicates how a {@link Service} responded to a given context
  */
 public enum State {
     /**
-     * The service consumed the context
-     * successfully and the execution should stop
+     * The service consumed the context successfully and the execution should stop
      */
     ACCEPTED,
     /**
-     * The service did not consume the context
-     * and the execution should continue
+     * The service did not consume the context and the execution should continue
      */
     REJECTED
 }

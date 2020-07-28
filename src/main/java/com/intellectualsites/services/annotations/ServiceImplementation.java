@@ -41,9 +41,11 @@ import java.lang.annotation.Target;
  * }
  * }</pre>
  */
-@Target(ElementType.METHOD) @Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
 public @interface ServiceImplementation {
-    /**
+
+  /**
      * The service class that the method implements
      *
      * @return Service to implement

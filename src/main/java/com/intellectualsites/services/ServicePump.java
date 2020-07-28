@@ -29,8 +29,7 @@ import com.intellectualsites.services.types.Service;
 import javax.annotation.Nonnull;
 
 /**
- * Class that forwards a context to a service type that consumes said
- * context
+ * Class that forwards a context to a service type that consumes said context
  *
  * @param <Context> Context to pump
  */
@@ -51,8 +50,9 @@ public final class ServicePump<Context> {
      * @param <Result> Result type
      * @return Service spigot instance
      */
-    @Nonnull public <Result> ServiceSpigot<Context, Result> through(
-        @Nonnull final TypeToken<? extends Service<Context, Result>> type) {
+    @Nonnull
+    public <Result> ServiceSpigot<Context, Result> through(
+            @Nonnull final TypeToken<? extends Service<Context, Result>> type) {
         return new ServiceSpigot<>(this.servicePipeline, this.context, type);
     }
 
@@ -63,8 +63,9 @@ public final class ServicePump<Context> {
      * @param <Result> Result type
      * @return Service spigot instance
      */
-    @Nonnull public <Result> ServiceSpigot<Context, Result> through(
-        @Nonnull final Class<? extends Service<Context, Result>> clazz) {
+    @Nonnull
+    public <Result> ServiceSpigot<Context, Result> through(
+            @Nonnull final Class<? extends Service<Context, Result>> clazz) {
         return this.through(TypeToken.of(clazz));
     }
 

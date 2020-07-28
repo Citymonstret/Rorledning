@@ -29,12 +29,15 @@ import java.util.function.Predicate;
 
 public class SecondaryMockService implements MockService, Predicate<MockService.MockContext> {
 
-    @Nullable @Override public MockResult handle(@Nonnull final MockContext mockContext) {
-        return new MockResult(999);
-    }
+  @Nullable
+  @Override
+  public MockResult handle(@Nonnull final MockContext mockContext) {
+    return new MockResult(999);
+  }
 
-    @Override public boolean test(final MockContext mockContext) {
-        return mockContext.getString().equalsIgnoreCase("potato");
-    }
+  @Override
+  public boolean test(final MockContext mockContext) {
+    return mockContext.getString().equalsIgnoreCase("potato");
+  }
 
 }

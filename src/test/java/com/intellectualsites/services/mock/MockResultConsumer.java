@@ -23,15 +23,17 @@
 //
 package com.intellectualsites.services.mock;
 
-import com.intellectualsites.services.types.SideEffectService;
 import com.intellectualsites.services.State;
+import com.intellectualsites.services.types.SideEffectService;
 
 import javax.annotation.Nonnull;
 
 public class MockResultConsumer implements SideEffectService<MockService.MockResult> {
 
-    @Nonnull @Override public State handle(@Nonnull final MockService.MockResult mockResultConsumer) {
-        return State.ACCEPTED;
-    }
+  @Nonnull
+  @Override
+  public State handle(@Nonnull final MockService.MockResult mockResultConsumer) {
+    return State.ACCEPTED;
+  }
 
 }

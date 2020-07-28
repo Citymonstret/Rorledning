@@ -39,23 +39,26 @@ import java.util.Map;
 public interface PartialResultService<Context, Result, Chunked extends ChunkedRequestContext<Context, Result>>
     extends Service<Chunked, Map<Context, Result>> {
 
-    @Override @Nullable default Map<Context, Result> handle(@Nonnull final Chunked context) {
-        if (!context.isCompleted()) {
-            this.handleRequests(context.getRemaining()).forEach(context::storeResult);
-        }
-        if (context.isCompleted()) {
-            return context.getAvailableResults();
-        }
-        return null;
+  @Override
+  @Nullable
+  default Map<Context, Result> handle(@Nonnull final Chunked context) {
+    if (!context.isCompleted()) {
+      this.handleRequests(context.getRemaining()).forEach(context::storeResult);
     }
+    if (context.isCompleted()) {
+      return context.getAvailableResults();
+    }
+    return null;
+  }
 
-    /**
-     * Attempt to generate results for a list of requests, and return
-     * a map of all successful requests
-     *
-     * @param requests Requests
-     * @return Map of request-result pairs
-     */
-    @Nonnull Map<Context, Result> handleRequests(@Nonnull List<Context> requests);
+  /**
+   * Attempt to generate results for a list of requests, and return a map of all successful
+   * requests
+   *
+   * @param requests Requests
+   * @return Map of request-result pairs
+   */
+  @Nonnull
+  Map<Context, Result> handleRequests(@Nonnull List<Context> requests);
 
 }

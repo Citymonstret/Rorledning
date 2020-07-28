@@ -31,35 +31,37 @@ import java.util.Collection;
 public class MockChunkedRequest
     extends ChunkedRequestContext<MockChunkedRequest.Animal, MockChunkedRequest.Sound> {
 
-    public MockChunkedRequest(@Nonnull final Collection<Animal> requests) {
-        super(requests);
+  public MockChunkedRequest(@Nonnull final Collection<Animal> requests) {
+    super(requests);
+  }
+
+  public static class Animal {
+
+    private final String name;
+
+    public Animal(@Nonnull final String name) {
+      this.name = name;
     }
 
-    public static class Animal {
+    @Nonnull
+    public String getName() {
+      return this.name;
+    }
+  }
 
-        private final String name;
 
-        public Animal(@Nonnull final String name) {
-            this.name = name;
-        }
+  public static class Sound {
 
-        @Nonnull public String getName() {
-            return this.name;
-        }
+    private final String sound;
+
+    public Sound(@Nonnull final String sound) {
+      this.sound = sound;
     }
 
-
-    public static class Sound {
-
-        private final String sound;
-
-        public Sound(@Nonnull final String sound) {
-            this.sound = sound;
-        }
-
-        @Nonnull public String getSound() {
-            return this.sound;
-        }
+    @Nonnull
+    public String getSound() {
+      return this.sound;
     }
+  }
 
 }

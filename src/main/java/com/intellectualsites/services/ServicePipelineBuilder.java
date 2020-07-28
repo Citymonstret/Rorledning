@@ -32,7 +32,8 @@ import java.util.concurrent.Executors;
 /**
  * Builder for {@link ServicePipeline}
  */
-@SuppressWarnings("unused") public final class ServicePipelineBuilder {
+@SuppressWarnings("unused")
+public final class ServicePipelineBuilder {
 
     private Executor executor = Executors.newSingleThreadExecutor();
 
@@ -40,12 +41,12 @@ import java.util.concurrent.Executors;
     }
 
     /**
-     * Construct a new {@link ServicePipeline} using the options
-     * specified in the builder
+     * Construct a new {@link ServicePipeline} using the options specified in the builder
      *
      * @return New service pipeline
      */
-    @Nonnull public ServicePipeline build() {
+    @Nonnull
+    public ServicePipeline build() {
         return new ServicePipeline(this.executor);
     }
 
@@ -56,7 +57,8 @@ import java.util.concurrent.Executors;
      * @param executor New executor
      * @return Builder instance
      */
-    @Nonnull public ServicePipelineBuilder withExecutor(@Nonnull final Executor executor) {
+    @Nonnull
+    public ServicePipelineBuilder withExecutor(@Nonnull final Executor executor) {
         this.executor = Preconditions.checkNotNull(executor, "Executor may not be null");
         return this;
     }

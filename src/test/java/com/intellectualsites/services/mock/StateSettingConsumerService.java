@@ -27,8 +27,9 @@ import javax.annotation.Nonnull;
 
 public class StateSettingConsumerService implements MockConsumerService {
 
-    @Override public void accept(@Nonnull final MockService.MockContext mockContext) {
-        mockContext.setState("");
-    }
+  @Override
+  public void accept(@Nonnull final MockService.MockContext mockContext) {
+    mockContext.setState("");
+  }
 
 }
