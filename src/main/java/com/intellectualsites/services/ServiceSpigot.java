@@ -113,6 +113,30 @@ public final class ServiceSpigot<Context, Result> {
     }
 
     /**
+     * Get the first result that is generated for the given context. If
+     * nothing manages to produce a result, an exception will be thrown. If the pipeline has
+     * been constructed properly, this will never happen. The exception passed to the consumer
+     * will be unwrapped, in the case that it's a {@link PipelineException}. Thus, the actual
+     * exception will be given instead of the wrapper.
+     *
+     * @param consumer Result consumer. If an exception was wrong, the result will be {@code null},
+     *                 otherwise the exception will be non-null and the exception will be {@code null}.
+     * @throws IllegalStateException If no result was found. This only happens if the pipeline
+     *                               has not been constructed properly. The most likely cause is a faulty default
+     *                               implementation
+     * @throws IllegalStateException If a {@link SideEffectService} returns {@code null}
+     */
+    public void getResult(@Nonnull final BiConsumer<Result, Throwable> consumer) {
+        try {
+            consumer.accept(getResult(), null);
+        } catch (final PipelineException pipelineException) {
+            consumer.accept(null, pipelineException.getCause());
+        } catch (final Exception e) {
+            consumer.accept(null, e);
+        }
+    }
+
+    /**
      * Get the first result that is generated for the given context. This cannot return null. If
      * nothing manages to produce a result, an exception will be thrown. If the pipeline has
      * been constructed properly, this will never happen.
@@ -139,30 +163,6 @@ public final class ServiceSpigot<Context, Result> {
      */
     @Nonnull public CompletableFuture<ServicePump<Result>> forwardAsynchronously() {
         return this.getResultAsynchronously().thenApply(pipeline::pump);
-    }
-
-    /**
-     * Get the first result that is generated for the given context. If
-     * nothing manages to produce a result, an exception will be thrown. If the pipeline has
-     * been constructed properly, this will never happen. The exception passed to the consumer
-     * will be unwrapped, in the case that it's a {@link PipelineException}. Thus, the actual
-     * exception will be given instead of the wrapper.
-     *
-     * @param consumer Result consumer. If an exception was wrong, the result will be {@code null},
-     *                 otherwise the exception will be non-null and the exception will be {@code null}.
-     * @throws IllegalStateException If no result was found. This only happens if the pipeline
-     *                               has not been constructed properly. The most likely cause is a faulty default
-     *                               implementation
-     * @throws IllegalStateException If a {@link SideEffectService} returns {@code null}
-     */
-    public void getResult(@Nonnull final BiConsumer<Result, Throwable> consumer) {
-        try {
-            consumer.accept(getResult(), null);
-        } catch (final PipelineException pipelineException) {
-            consumer.accept(null, pipelineException.getCause());
-        } catch (final Exception e) {
-            consumer.accept(null, e);
-        }
     }
 
 }

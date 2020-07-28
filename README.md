@@ -1,5 +1,7 @@
 # Rörledning
 
+[![CodeFactor](https://www.codefactor.io/repository/github/sauilitired/rorledning/badge/master)](https://www.codefactor.io/repository/github/sauilitired/rorledning/overview/master)
+
 This is a library that allows you to create services, that can have several different implementations.
 A service in this case, is anything that takes in a context, and spits out some sort of result, achieving
 some pre-determined task.
