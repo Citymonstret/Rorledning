@@ -105,7 +105,6 @@ public final class ServiceSpigot<Context, Result> {
         // This is hack to make it so that the default
         // consumer implementation does not have to call #interrupt
         if (consumerService) {
-
             return (Result) State.ACCEPTED;
         }
         throw new IllegalStateException(
