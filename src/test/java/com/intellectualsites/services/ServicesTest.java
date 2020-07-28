@@ -71,6 +71,9 @@ public class ServicesTest {
         Assertions.assertEquals(32,
             servicePipeline.pump(new MockService.MockContext("Hello")).through(MockService.class)
                 .getResult().getInteger());
+        servicePipeline.pump(new MockService.MockContext("Hello")).through(MockService.class)
+            .getResult(
+                (mockResult, throwable) -> Assertions.assertEquals(32, mockResult.getInteger()));
         Assertions.assertEquals(999,
             servicePipeline.pump(new MockService.MockContext("potato")).through(MockService.class)
                 .getResult().getInteger());
@@ -80,6 +83,7 @@ public class ServicesTest {
         Assertions.assertNotNull(
             servicePipeline.pump(new MockService.MockContext("oi")).through(MockService.class)
                 .getResultAsynchronously().get());
+
     }
 
     @Test public void testSideEffectServices() {
@@ -192,6 +196,25 @@ public class ServicesTest {
         Assertions.assertEquals("moo", sounds.get(cow).getSound());
         Assertions.assertEquals("woof", sounds.get(dog).getSound());
         Assertions.assertEquals("unknown", sounds.get(cat).getSound());
+    }
+
+    @Test public void testExceptions() {
+        final ServicePipeline servicePipeline = ServicePipeline.builder().build();
+        Assertions.assertNotNull(servicePipeline);
+        servicePipeline
+            .registerServiceType(TypeToken.of(MockService.class), new DefaultMockService());
+        final PipelineException pipelineException = Assertions.assertThrows(PipelineException.class,
+            () -> servicePipeline.pump(new MockService.MockContext("pls throw exception"))
+                .through(MockService.class).getResult());
+        Assertions.assertEquals(DefaultMockService.TotallyIntentionalException.class,
+            pipelineException.getCause().getClass());
+        servicePipeline.pump(new MockService.MockContext("pls throw exception"))
+            .through(MockService.class).getResult((result, throwable) -> {
+            Assertions.assertNotNull(throwable);
+            Assertions.assertEquals(DefaultMockService.TotallyIntentionalException.class,
+                throwable.getClass());
+            Assertions.assertNull(result);
+        });
     }
 
 }

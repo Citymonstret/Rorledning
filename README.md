@@ -399,3 +399,33 @@ public class CompletingPartialResultService implements MockPartialResultService 
 
 }
 ```
+
+### Exception Handling
+
+Exceptions thrown during result retrieval and implementation filtering will be wrapped by
+`PipelineException`. You can use `PipelineException#getCause` to get the exception that was wrapped.
+
+**Example:**
+
+```java
+try {
+    final Result result = pipeline.pump(yourContext).through(YourService.class).getResult();
+} catch (final PipelineException exception) {
+    final Exception cause = exception.getCause();
+}
+```
+
+You may also make use of `ServicePipeline#getException(BiConsumer<Result, Throwable>)`. This method
+will unwrap any pipeline exceptions before passing them to the consumer.
+
+**Example:**
+
+```java
+pipeline.getResult((result, exception) -> {
+    if (exception != null) {
+        exception.printStackTrace();
+    } else {
+        // consume result
+    }
+});
+```

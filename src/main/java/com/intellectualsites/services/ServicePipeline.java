@@ -103,7 +103,8 @@ public final class ServicePipeline {
      * @return Service pipeline instance
      * @throws Exception Any exceptions thrown during the registration process
      */
-    public <T> ServicePipeline registerMethods(@Nonnull final T instance) throws Exception {
+    @SuppressWarnings("unchecked") public <T> ServicePipeline registerMethods(
+        @Nonnull final T instance) throws Exception {
         synchronized (this.lock) {
             final Map<? extends Service<?, ?>, TypeToken<? extends Service<?, ?>>> services =
                 AnnotatedMethodServiceFactory.INSTANCE.lookupServices(instance);
@@ -176,7 +177,8 @@ public final class ServicePipeline {
         return new ServicePump<>(this, context);
     }
 
-    @Nonnull <Context, Result> ServiceRepository<Context, Result> getRepository(
+    @SuppressWarnings("unchecked") @Nonnull
+    <Context, Result> ServiceRepository<Context, Result> getRepository(
         @Nonnull final TypeToken<? extends Service<Context, Result>> type) {
         final ServiceRepository<Context, Result> repository =
             (ServiceRepository<Context, Result>) this.repositories.get(type);
@@ -206,8 +208,7 @@ public final class ServicePipeline {
      * @return Returns an collection of the {@link TypeToken}s of the implementations for a given service.
      * Iterator order matches the priority when pumping contexts through the pipeline
      */
-    @Nonnull
-    public <Context, Result, S extends Service<Context, Result>> Collection<TypeToken<? extends S>> getImplementations(
+    @Nonnull @SuppressWarnings("unchecked") public <Context, Result, S extends Service<Context, Result>> Collection<TypeToken<? extends S>> getImplementations(
         @Nonnull final TypeToken<S> type) {
         ServiceRepository<Context, Result> repository = getRepository(type);
         List<TypeToken<? extends S>> collection = new LinkedList<>();

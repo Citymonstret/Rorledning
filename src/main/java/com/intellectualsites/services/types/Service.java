@@ -24,6 +24,7 @@
 package com.intellectualsites.services.types;
 
 import com.intellectualsites.services.ExecutionOrder;
+import com.intellectualsites.services.PipelineException;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -41,8 +42,7 @@ import java.util.function.Function;
  * @param <Result>  Response type, this is what is produced
  *                  by the service ("provided")
  */
-@FunctionalInterface
-public interface Service<Context, Result> extends Function<Context, Result> {
+@FunctionalInterface public interface Service<Context, Result> extends Function<Context, Result> {
 
     /**
      * Provide a response for the given context. If the service implementation
@@ -53,11 +53,17 @@ public interface Service<Context, Result> extends Function<Context, Result> {
      * service in the service chain will get to act on the context.
      * Otherwise the execution halts, and the provided response is the
      * final response.
+     * @throws Exception Any exception that occurs during the handling
+     *                   can be thrown, and will be wrapped by a {@link PipelineException}
      */
-    @Nullable Result handle(@Nonnull Context context);
+    @Nullable Result handle(@Nonnull Context context) throws Exception;
 
     @Override default Result apply(@Nonnull Context context) {
-        return this.handle(context);
+        try {
+            return this.handle(context);
+        } catch (final Exception exception) {
+            throw new PipelineException(exception);
+        }
     }
 
     /**

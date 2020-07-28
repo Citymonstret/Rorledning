@@ -89,7 +89,8 @@ public final class ServiceRepository<Context, Response> {
      * Used to store {@link Service} implementations together
      * with their state
      */
-    final class ServiceWrapper<T extends Service<Context, Response>> implements Comparable<ServiceWrapper<T>> {
+    final class ServiceWrapper<T extends Service<Context, Response>>
+        implements Comparable<ServiceWrapper<T>> {
 
         private final boolean defaultImplementation;
         private final T implementation;
@@ -98,7 +99,8 @@ public final class ServiceRepository<Context, Response> {
         private final int registrationOrder = ServiceRepository.this.registrationOrder++;
         private final ExecutionOrder executionOrder;
 
-        private ServiceWrapper(@Nonnull final T implementation, @Nonnull final Collection<Predicate<Context>> filters) {
+        private ServiceWrapper(@Nonnull final T implementation,
+            @Nonnull final Collection<Predicate<Context>> filters) {
             this.defaultImplementation = implementations.isEmpty();
             this.implementation = implementation;
             this.filters = filters;
@@ -133,10 +135,11 @@ public final class ServiceRepository<Context, Response> {
         }
 
         @Override public int compareTo(@Nonnull final ServiceWrapper<T> other) {
-            return Comparator.<ServiceWrapper<T>>comparingInt(wrapper -> wrapper.isDefaultImplementation() ? Integer.MIN_VALUE : Integer.MAX_VALUE)
-                .thenComparingInt(wrapper -> wrapper.executionOrder.ordinal())
-                .thenComparingInt(wrapper -> wrapper.registrationOrder)
-                .compare(this, other);
+            return Comparator.<ServiceWrapper<T>>comparingInt(
+                wrapper -> wrapper.isDefaultImplementation() ?
+                    Integer.MIN_VALUE :
+                    Integer.MAX_VALUE).thenComparingInt(wrapper -> wrapper.executionOrder.ordinal())
+                .thenComparingInt(wrapper -> wrapper.registrationOrder).compare(this, other);
         }
 
     }

@@ -31,6 +31,7 @@ import com.intellectualsites.services.types.SideEffectService;
 import javax.annotation.Nonnull;
 import java.util.LinkedList;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.BiConsumer;
 
 /**
  * Class that outputs results from the given context, using the specified service type
@@ -52,13 +53,26 @@ public final class ServiceSpigot<Context, Result> {
     }
 
     /**
-     * Get the first result that is generated for the given context. This cannot return null. If
-     * nothing manages to produce a result, an exception will be thrown. If the pipeline has
+     * Get the first result that is generated for the given context. This cannot return {@code null}.
+     * If nothing manages to produce a result, an exception will be thrown. If the pipeline has
      * been constructed properly, this will never happen.
      *
      * @return Generated result
+     * @throws IllegalStateException If no result was found. This only happens if the pipeline
+     *                               has not been constructed properly. The most likely cause is a faulty default
+     *                               implementation
+     * @throws IllegalStateException If a {@link SideEffectService} returns {@code null}
+     * @throws PipelineException     Any exceptions thrown during result retrieval from the
+     *                               implementations will be wrapped by {@link PipelineException}.
+     *                               Use {@link PipelineException#getCause()} to get the exception that was thrown.
+     * @throws PipelineException     Any exceptions thrown during filtering will be wrapped by
+     *                               {@link PipelineException}. Use {@link PipelineException#getCause()} to get
+     *                               the exception that was thrown.
+     * @see PipelineException PipelineException wraps exceptions thrown during filtering
+     * and result retrieval
      */
-    @Nonnull public Result getResult() {
+    @Nonnull @SuppressWarnings("unchecked") public Result getResult()
+        throws IllegalStateException, PipelineException {
         final LinkedList<? extends ServiceRepository<Context, Result>.ServiceWrapper<? extends Service<Context, Result>>>
             queue = this.repository.getQueue();
         queue.sort(null); // Sort using the built in comparator method
@@ -70,7 +84,13 @@ public final class ServiceSpigot<Context, Result> {
             if (!ServiceFilterHandler.INSTANCE.passes(wrapper, this.context)) {
                 continue;
             }
-            final Result result = wrapper.getImplementation().handle(this.context);
+            final Result result;
+            try {
+                result = wrapper.getImplementation().handle(this.context);
+            } catch (final Exception e) {
+                throw new PipelineException(
+                    String.format("Failed to retrieve result from %s", wrapper.toString()), e);
+            }
             if (wrapper.getImplementation() instanceof SideEffectService) {
                 if (result == null) {
                     throw new IllegalStateException(
@@ -85,6 +105,7 @@ public final class ServiceSpigot<Context, Result> {
         // This is hack to make it so that the default
         // consumer implementation does not have to call #interrupt
         if (consumerService) {
+
             return (Result) State.ACCEPTED;
         }
         throw new IllegalStateException(
@@ -118,6 +139,30 @@ public final class ServiceSpigot<Context, Result> {
      */
     @Nonnull public CompletableFuture<ServicePump<Result>> forwardAsynchronously() {
         return this.getResultAsynchronously().thenApply(pipeline::pump);
+    }
+
+    /**
+     * Get the first result that is generated for the given context. If
+     * nothing manages to produce a result, an exception will be thrown. If the pipeline has
+     * been constructed properly, this will never happen. The exception passed to the consumer
+     * will be unwrapped, in the case that it's a {@link PipelineException}. Thus, the actual
+     * exception will be given instead of the wrapper.
+     *
+     * @param consumer Result consumer. If an exception was wrong, the result will be {@code null},
+     *                 otherwise the exception will be non-null and the exception will be {@code null}.
+     * @throws IllegalStateException If no result was found. This only happens if the pipeline
+     *                               has not been constructed properly. The most likely cause is a faulty default
+     *                               implementation
+     * @throws IllegalStateException If a {@link SideEffectService} returns {@code null}
+     */
+    public void getResult(@Nonnull final BiConsumer<Result, Throwable> consumer) {
+        try {
+            consumer.accept(getResult(), null);
+        } catch (final PipelineException pipelineException) {
+            consumer.accept(null, pipelineException.getCause());
+        } catch (final Exception e) {
+            consumer.accept(null, e);
+        }
     }
 
 }

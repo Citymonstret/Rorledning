@@ -36,8 +36,17 @@ import java.util.function.Consumer;
  *
  * @param <Context> Context
  */
-@FunctionalInterface
-public interface ConsumerService<Context> extends SideEffectService<Context>, Consumer<Context> {
+@FunctionalInterface public interface ConsumerService<Context>
+    extends SideEffectService<Context>, Consumer<Context> {
+
+    /**
+     * Immediately terminate the execution and return {@link State#ACCEPTED}
+     *
+     * @throws PipeBurst Pipe burst
+     */
+    static void interrupt() throws PipeBurst {
+        throw new PipeBurst();
+    }
 
     @Nonnull @Override default State handle(@Nonnull final Context context) {
         try {
@@ -56,14 +65,6 @@ public interface ConsumerService<Context> extends SideEffectService<Context>, Co
      */
     @Override void accept(@Nonnull Context context);
 
-    /**
-     * Immediately terminate the execution and return {@link State#ACCEPTED}
-     *
-     * @throws PipeBurst Pipe burst
-     */
-    static void interrupt() throws PipeBurst {
-        throw new PipeBurst();
-    }
 
     class PipeBurst extends RuntimeException {
 

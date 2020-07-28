@@ -32,7 +32,7 @@ import java.util.concurrent.Executors;
 /**
  * Builder for {@link ServicePipeline}
  */
-public final class ServicePipelineBuilder {
+@SuppressWarnings("unused") public final class ServicePipelineBuilder {
 
     private Executor executor = Executors.newSingleThreadExecutor();
 

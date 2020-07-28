@@ -33,8 +33,6 @@ import java.lang.annotation.Target;
 /**
  * Used to specify the relative priority of a service implementation
  */
-@Target({ElementType.TYPE, ElementType.METHOD})
-@Retention(RetentionPolicy.RUNTIME)
-public @interface Order {
+@Target({ElementType.TYPE, ElementType.METHOD}) @Retention(RetentionPolicy.RUNTIME) public @interface Order {
     ExecutionOrder value() default ExecutionOrder.SOON;
 }

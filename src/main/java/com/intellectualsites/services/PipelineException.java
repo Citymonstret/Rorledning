@@ -23,31 +23,22 @@
 //
 package com.intellectualsites.services;
 
-import com.intellectualsites.services.types.Service;
-
 import javax.annotation.Nonnull;
-import java.util.function.Predicate;
 
-enum ServiceFilterHandler {
-    INSTANCE;
+/**
+ * Wrapper for exceptions thrown during pipeline execution.
+ *
+ * @see #getCause() Use {@link #getCause()} to get the
+ * wrapped exception
+ */
+public final class PipelineException extends RuntimeException {
 
-    <Context> boolean passes(@Nonnull
-    final ServiceRepository<Context, ?>.ServiceWrapper<? extends Service<Context, ?>> service,
-        @Nonnull final Context context) {
-        if (!service.isDefaultImplementation()) {
-            for (final Predicate<Context> predicate : service.getFilters()) {
-                try {
-                    if (!predicate.test(context)) {
-                        return false;
-                    }
-                } catch (final Exception e) {
-                    throw new PipelineException(String
-                        .format("Failed to evaluate filter '%s' for '%s'",
-                            predicate.getClass().getCanonicalName(), service.toString()), e);
-                }
-            }
-        }
-        return true;
+    public PipelineException(@Nonnull final Exception cause) {
+        super(cause);
+    }
+
+    public PipelineException(@Nonnull final String message, @Nonnull final Exception cause) {
+        super(message, cause);
     }
 
 }

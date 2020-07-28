@@ -23,6 +23,7 @@
 //
 package com.intellectualsites.services.types;
 
+import com.intellectualsites.services.PipelineException;
 import com.intellectualsites.services.State;
 
 import javax.annotation.Nonnull;
@@ -32,10 +33,9 @@ import javax.annotation.Nonnull;
  * way. A SideEffectService does not return a generated result, instead it
  * returns a response, indicating whether or not the context was consumed
  *
- * @param <Context>  Context type.
+ * @param <Context> Context type.
  */
-@FunctionalInterface
-public interface SideEffectService<Context> extends Service<Context, State> {
+@FunctionalInterface public interface SideEffectService<Context> extends Service<Context, State> {
 
     /**
      * Consumes the context, if possible. Returns {@link State#ACCEPTED} if
@@ -43,10 +43,12 @@ public interface SideEffectService<Context> extends Service<Context, State> {
      *
      * @param context context used in the generation of the response
      * @return Response. If the response isn't {@link State#ACCEPTED}, the next
-     *         service in the service chain will get to act on the context.
-     *         Otherwise the execution halts, and the provided response is the
-     *         final response.
+     * service in the service chain will get to act on the context.
+     * Otherwise the execution halts, and the provided response is the
+     * final response.
+     * @throws Exception Any exception that occurs during the handling
+     *                   can be thrown, and will be wrapped by a {@link PipelineException}
      */
-    @Override @Nonnull State handle(@Nonnull final Context context);
+    @Override @Nonnull State handle(@Nonnull final Context context) throws Exception;
 
 }

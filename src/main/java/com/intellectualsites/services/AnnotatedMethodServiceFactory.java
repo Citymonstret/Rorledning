@@ -35,21 +35,24 @@ import java.util.Map;
 enum AnnotatedMethodServiceFactory {
     INSTANCE;
 
-    Map<? extends Service<?, ?>, TypeToken<? extends Service<?, ?>>> lookupServices(@Nonnull final Object instance) throws Exception {
+    Map<? extends Service<?, ?>, TypeToken<? extends Service<?, ?>>> lookupServices(
+        @Nonnull final Object instance) throws Exception {
         final Map<Service<?, ?>, TypeToken<? extends Service<?, ?>>> map = new HashMap<>();
         final Class<?> clazz = instance.getClass();
         for (final Method method : clazz.getDeclaredMethods()) {
-            final ServiceImplementation serviceImplementation = method.getAnnotation(ServiceImplementation.class);
+            final ServiceImplementation serviceImplementation =
+                method.getAnnotation(ServiceImplementation.class);
             if (serviceImplementation == null) {
                 continue;
             }
             if (method.getParameterCount() != 1) {
-                throw new IllegalArgumentException(String.format("Method '%s' in class '%s'"
-                    + " has wrong parameter count. Expected 1, got %d",
-                    method.getName(), instance.getClass().getCanonicalName(), method.getParameterCount()));
+                throw new IllegalArgumentException(String.format(
+                    "Method '%s' in class '%s'" + " has wrong parameter count. Expected 1, got %d",
+                    method.getName(), instance.getClass().getCanonicalName(),
+                    method.getParameterCount()));
 
             }
-            map.put(new AnnotatedMethodService(instance, method),
+            map.put(new AnnotatedMethodService<>(instance, method),
                 TypeToken.of(serviceImplementation.value()));
         }
         return map;
